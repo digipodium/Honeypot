@@ -5,6 +5,85 @@
     <title>Document</title>
 </head>
 <body>
-    hii
+    
+    </style>
+</head>
+
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="box">
+    <h2 id="title">Login</h2>
+
+    <form method="POST">
+        <input type="hidden" name="form_type" id="form_type" value="login">
+
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <div class="toggle" onclick="toggleForm()">Switch to Signup</div>
+</div>
+
+<script>
+    // Toggle Login/Signup
+    function toggleForm() {
+        let title = document.getElementById("title");
+        let formType = document.getElementById("form_type");
+        let toggle = document.querySelector(".toggle");
+
+        if (title.innerText === "Login") {
+            title.innerText = "Signup";
+            formType.value = "signup";
+            toggle.innerText = "Switch to Login";
+        } else {
+            title.innerText = "Login";
+            formType.value = "login";
+            toggle.innerText = "Switch to Signup";
+        }
+    }
+
+    // MATRIX EFFECT
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const matrix = letters.split("");
+
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = [];
+
+    for (let i = 0; i < columns; i++) {
+        drops[i] = 1;
+    }
+
+    function draw() {
+        ctx.fillStyle = "rgba(0,0,0,0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#00ff00";
+        ctx.font = fontSize + "px monospace";
+
+        for (let i = 0; i < drops.length; i++) {
+            let text = matrix[Math.floor(Math.random() * matrix.length)];
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+
+            drops[i]++;
+        }
+    }
+
+    setInterval(draw, 33);
+    </script>
 </body>
 </html>
