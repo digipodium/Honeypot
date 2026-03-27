@@ -1,142 +1,171 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Honeypot Auth</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: black;
-            color: #00ff00;
-            font-family: monospace;
-        }
+{% extends 'base.html' %}
 
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
+{% block css %}
 
-        .box {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.85);
-            padding: 30px;
-            border: 1px solid #00ff00;
-            box-shadow: 0 0 20px #00ff00;
-            width: 300px;
-        }
+<style>
 
-        h2 {
-            text-align: center;
-        }
+@import url("https://fonts.googleapis.com/css?family=Fira+Sans");
 
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            background: black;
-            border: 1px solid #00ff00;
-            color: #00ff00;
-        }
+body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Fira Sans", sans-serif;
+}
 
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #00ff00;
-            border: none;
-            color: black;
-            font-weight: bold;
-            cursor: pointer;
-        }
+/* container */
 
-        .toggle {
-            text-align: center;
-            margin-top: 10px;
-            cursor: pointer;
-            color: #00ff00;
-        }
-    </style>
-</head>
+.form-structor {
+    background-image: url('https://vida.id/hubfs/Perbedaan%20Hacker%20dan%20Cracker.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    border-radius: 15px;
+    height: 550px;
+    width: 350px;
+    position: relative;
+    overflow: hidden;
+}
 
-<body>
+/* SIGNUP */
 
-<canvas id="matrix"></canvas>
+.signup {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 65%;
+    z-index: 5;
+    transition: .3s;
+}
 
-<div class="box">
-    <h2 id="title">Login</h2>
+.signup.slide-up {
+    top: 85%;
+}
 
-    <form method="POST">
-        <input type="hidden" name="form_type" id="form_type" value="login">
+.signup .form-title {
+    color: rgb(10, 86, 52);
+    font-size: 1.7em;
+    text-align: center;
+    cursor: pointer;
+}
 
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
+.signup .form-holder {
+    border-radius: 15px;
+    margin-top: 30px;
+    overflow: hidden;
+}
 
-        <button type="submit">Submit</button>
-    </form>
+.input {
+    border: none;
+    width: 100%;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
 
-    <div class="toggle" onclick="toggleForm()">Switch to Signup</div>
+.submit-btn {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    border: none;
+    border-radius: 15px;
+    background: #444;
+    color: white;
+    cursor: pointer;
+}
+
+/* LOGIN */
+
+.login {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 80%;
+    border-radius: 50% 50% 0 0;
+    transition: .3s;
+}
+
+.login.slide-up {
+    height: 20%;
+}
+
+.center {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 65%;
+}
+
+.login .form-title {
+    text-align: center;
+    font-size: 1.7em;
+    cursor: pointer;
+    color: seagreen;
+}
+
+.login .form-holder {
+    margin-top: 30px;
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="form-structor" >
+
+    <div class="signup slide-up">
+        <h2 class="form-title" id="signup">Sign up</h2>
+
+        <div class="form-holder">
+            <input type="text" class="input" placeholder="Name">
+            <input type="email" class="input" placeholder="Email">
+            <input type="password" class="input" placeholder="Password">
+        </div>
+
+        <button class="submit-btn">Sign up</button>
+    </div>
+
+
+    <div class="login">
+        <div class="center">
+
+            <h2 class="form-title" id="login">Log in</h2>
+
+            <div class="form-holder">
+                <input type="email" class="input" placeholder="Email">
+                <input type="password" class="input" placeholder="Password">
+            </div>
+
+            <button class="submit-btn">Log in</button>
+
+        </div>
+    </div>
+
 </div>
 
+{% endblock %}
+
+{% block js %}
+
 <script>
-    // Toggle Login/Signup
-    function toggleForm() {
-        let title = document.getElementById("title");
-        let formType = document.getElementById("form_type");
-        let toggle = document.querySelector(".toggle");
 
-        if (title.innerText === "Login") {
-            title.innerText = "Signup";
-            formType.value = "signup";
-            toggle.innerText = "Switch to Login";
-        } else {
-            title.innerText = "Login";
-            formType.value = "login";
-            toggle.innerText = "Switch to Signup";
-        }
-    }
+const loginBtn = document.getElementById("login");
+const signupBtn = document.getElementById("signup");
 
-    // MATRIX EFFECT
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
+loginBtn.onclick = () => {
+    document.querySelector(".login").classList.remove("slide-up");
+    document.querySelector(".signup").classList.add("slide-up");
+};
 
-    canvas.height = window.innerHeight;
-    canvas.width = window.innerWidth;
+signupBtn.onclick = () => {
+    document.querySelector(".signup").classList.remove("slide-up");
+    document.querySelector(".login").classList.add("slide-up");
+};
 
-    const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const matrix = letters.split("");
-
-    const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops = [];
-
-    for (let i = 0; i < columns; i++) {
-        drops[i] = 1;
-    }
-
-    function draw() {
-        ctx.fillStyle = "rgba(0,0,0,0.05)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = "#00ff00";
-        ctx.font = fontSize + "px monospace";
-
-        for (let i = 0; i < drops.length; i++) {
-            let text = matrix[Math.floor(Math.random() * matrix.length)];
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                drops[i] = 0;
-            }
-
-            drops[i]++;
-        }
-    }
-
-    setInterval(draw, 33);
 </script>
 
-</body>
-</html>
+{% endblock %}
