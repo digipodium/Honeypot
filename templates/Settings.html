@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings — SecureWatch</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      background:#0f1117;
+      color:#e2e8f0;
+      min-height:100vh;
+    }
+
+    /* ── NAV ── */
+    nav{
+      display:flex;align-items:center;
+      padding:0 24px;
+      background:#16192a;
+      border-bottom:1px solid #2d3148;
+      height:52px;
+      position:sticky;top:0;z-index:100;
+    }
+    .nav-brand{
+      font-size:15px;font-weight:700;color:#f1f5f9;
+      letter-spacing:-0.02em;margin-right:32px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .nav-brand .shield{
+      width:22px;height:22px;background:#4f6dff;border-radius:5px;
+      display:flex;align-items:center;justify-content:center;font-size:12px;
+    }
+    .nav-links{display:flex;gap:2px;}
+    .nav-link{
+      font-size:13px;color:#64748b;text-decoration:none;
+      padding:6px 14px;border-radius:6px;
+      transition:background 0.15s,color 0.15s;
+    }
+    .nav-link:hover{background:#252840;color:#cbd5e1;}
+    .nav-link.active{background:#252840;color:#f1f5f9;}
+    .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+    .live-badge{
+      display:inline-flex;align-items:center;gap:5px;
+      font-size:11px;color:#4ade80;
+      background:#0f2a1a;border:1px solid #14532d;
+      border-radius:99px;padding:3px 10px;
+    }
+    .live-dot{
+      width:6px;height:6px;border-radius:50%;background:#4ade80;
+      animation:pulse 1.5s infinite;
+    }
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.8);}}
+
+    /* ── LAYOUT ── */
+    .layout{display:flex;min-height:calc(100vh - 52px);}
+
+    /* ── SIDEBAR ── */
+    .sidebar{
+      width:220px;flex-shrink:0;
+      background:#16192a;
+      border-right:1px solid #2d3148;
+      padding:20px 12px;
+    }
+
+    .sidebar-section{
+      font-size:10px;font-weight:600;color:#475569;
+      text-transform:uppercase;letter-spacing:0.08em;
+      padding:0 10px;margin:18px 0 6px;
+    }
+    .sidebar-section:first-child{margin-top:0;}
+
+    .sidebar-item{
+      display:flex;align-items:center;gap:10px;
+      font-size:13px;color:#64748b;
+      padding:8px 10px;border-radius:7px;
+      cursor:pointer;
+      transition:background 0.15s,color 0.15s;
+      margin-bottom:1px;
+      user-select:none;
+    }
+    .sidebar-item:hover{background:#252840;color:#cbd5e1;}
+    .sidebar-item.active{background:#1e2545;color:#f1f5f9;}
+    .sidebar-item .s-icon{font-size:14px;width:18px;text-align:center;}
+    .sidebar-badge{
+      margin-left:auto;font-size:10px;font-weight:600;
+      background:#3b1212;color:#f87171;border:1px solid #7f1d1d;
+      border-radius:99px;padding:1px 7px;
+    }
+
+    /* ── MAIN ── */
+    .main{flex:1;padding:28px 32px;max-width:860px;}
+
+    .page-header{margin-bottom:28px;}
+    h1{font-size:22px;font-weight:600;color:#f1f5f9;}
+    .subtitle{font-size:13px;color:#64748b;margin-top:3px;}
+
+    /* ── SECTION ── */
+    .settings-section{display:none;}
+    .settings-section.active{display:block;}
+
+    .section-title{
+      font-size:16px;font-weight:500;color:#f1f5f9;
+      margin-bottom:4px;
+    }
+    .section-desc{font-size:12px;color:#475569;margin-bottom:20px;}
+
+    /* ── CARD ── */
+    .card{
+      background:#1e2130;border:1px solid #2d3148;
+      border-radius:12px;margin-bottom:16px;overflow:hidden;
+    }
+
+    .card-header{
+      padding:14px 18px;
+      border-bottom:1px solid #2d3148;
+      font-size:13px;font-weight:500;color:#cbd5e1;
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .card-header span{font-size:11px;color:#475569;font-weight:400;}
+
+    /* ── SETTING ROW ── */
+    .setting-row{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 18px;
+      border-bottom:1px solid #1a1d2e;
+      gap:20px;
+    }
+    .setting-row:last-child{border-bottom:none;}
+
+    .setting-info{flex:1;}
+    .setting-label{font-size:13px;color:#e2e8f0;margin-bottom:2px;}
+    .setting-desc{font-size:11px;color:#475569;line-height:1.5;}
+
+    .setting-control{flex-shrink:0;}
+
+    /* ── TOGGLE ── */
+    .toggle{
+      position:relative;width:40px;height:22px;cursor:pointer;
+    }
+    .toggle input{opacity:0;width:0;height:0;position:absolute;}
+    .toggle-track{
+      position:absolute;inset:0;
+      background:#2d3148;border-radius:99px;
+      transition:background 0.2s;
+    }
+    .toggle input:checked ~ .toggle-track{background:#4f6dff;}
+    .toggle-thumb{
+      position:absolute;top:3px;left:3px;
+      width:16px;height:16px;border-radius:50%;
+      background:#fff;transition:transform 0.2s;
+      pointer-events:none;
+    }
+    .toggle input:checked ~ .toggle-thumb{transform:translateX(18px);}
+
+    /* ── SELECT ── */
+    .setting-select{
+      font-size:12px;
+      padding:6px 10px;
+      border:1px solid #2d3148;border-radius:7px;
+      background:#16192a;color:#e2e8f0;
+      outline:none;cursor:pointer;
+      transition:border-color 0.2s;
+      min-width:140px;
+    }
+    .setting-select:focus{border-color:#4f6dff;}
+
+    /* ── INPUT ── */
+    .setting-input{
+      font-size:12px;
+      padding:6px 10px;
+      border:1px solid #2d3148;border-radius:7px;
+      background:#16192a;color:#e2e8f0;
+      outline:none;width:180px;
+      transition:border-color 0.2s;
+    }
+    .setting-input:focus{border-color:#4f6dff;}
+
+    /* ── RANGE ── */
+    .range-wrap{display:flex;align-items:center;gap:10px;}
+    .range-wrap input[type=range]{
+      width:120px;accent-color:#4f6dff;cursor:pointer;
+    }
+    .range-val{font-size:12px;color:#94a3b8;min-width:36px;text-align:right;}
+
+    /* ── BUTTON ── */
+    .btn{
+      font-size:12px;padding:7px 14px;border-radius:7px;
+      cursor:pointer;transition:background 0.15s,opacity 0.15s;
+      font-family:inherit;
+    }
+    .btn-primary{border:1px solid #4f6dff;background:#4f6dff;color:#fff;}
+    .btn-primary:hover{background:#3b56e0;}
+    .btn-secondary{border:1px solid #2d3148;background:transparent;color:#94a3b8;}
+    .btn-secondary:hover{background:#252840;}
+    .btn-danger{border:1px solid #7f1d1d;background:#3b1212;color:#f87171;}
+    .btn-danger:hover{background:#4b1a1a;}
+    .btn-warning{border:1px solid #713f12;background:#332b00;color:#fbbf24;}
+    .btn-warning:hover{background:#3f3400;}
+    .btn-sm{padding:5px 10px;font-size:11px;}
+
+    /* ── TAG INPUT ── */
+    .tag-wrap{
+      display:flex;flex-wrap:wrap;gap:6px;
+      background:#16192a;border:1px solid #2d3148;
+      border-radius:7px;padding:8px 10px;
+      min-width:260px;
+    }
+    .tag{
+      display:inline-flex;align-items:center;gap:5px;
+      font-size:11px;color:#93c5fd;
+      background:#0d1f3b;border:1px solid #1e3a6e;
+      border-radius:99px;padding:2px 9px;
+    }
+    .tag-remove{cursor:pointer;color:#475569;font-size:13px;line-height:1;}
+    .tag-remove:hover{color:#f87171;}
+    .tag-input-field{
+      font-size:12px;background:transparent;border:none;
+      color:#e2e8f0;outline:none;min-width:80px;
+    }
+
+    /* ── COLOR PICKER ROW ── */
+    .color-row{display:flex;align-items:center;gap:8px;}
+    .color-swatch{
+      width:24px;height:24px;border-radius:5px;
+      border:1px solid #2d3148;cursor:pointer;flex-shrink:0;
+      overflow:hidden;
+    }
+    .color-swatch input[type=color]{
+      width:200%;height:200%;margin:-25%;cursor:pointer;border:none;padding:0;
+      opacity:0;position:absolute;
+    }
+    .color-swatch{position:relative;}
+
+    /* ── ALERT RULE ROW ── */
+    .rule-row{
+      display:flex;align-items:center;gap:8px;
+      padding:10px 18px;border-bottom:1px solid #1a1d2e;
+      font-size:12px;
+    }
+    .rule-row:last-child{border-bottom:none;}
+    .rule-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .rule-label{flex:1;color:#cbd5e1;}
+    .rule-condition{color:#64748b;font-family:monospace;font-size:11px;}
+
+    /* ── PROFILE AVATAR ── */
+    .avatar-wrap{display:flex;align-items:center;gap:16px;padding:18px;}
+    .avatar{
+      width:56px;height:56px;border-radius:50%;
+      background:#1e2545;border:2px solid #4f6dff;
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;font-weight:700;color:#60a5fa;
+      flex-shrink:0;
+    }
+    .avatar-info .avatar-name{font-size:15px;font-weight:500;color:#f1f5f9;}
+    .avatar-info .avatar-role{font-size:12px;color:#64748b;margin-top:2px;}
+    .avatar-info .avatar-email{font-size:12px;color:#475569;margin-top:1px;}
+
+    /* ── API KEY ── */
+    .api-key-wrap{display:flex;align-items:center;gap:8px;}
+    .api-key-field{
+      font-family:monospace;font-size:12px;
+      padding:6px 10px;border:1px solid #2d3148;border-radius:7px;
+      background:#16192a;color:#94a3b8;width:260px;letter-spacing:0.05em;
+    }
+
+    /* ── LOG TABLE ── */
+    .log-table{width:100%;border-collapse:collapse;font-size:12px;}
+    .log-table th{
+      padding:9px 14px;text-align:left;
+      font-size:10px;font-weight:600;color:#475569;
+      text-transform:uppercase;letter-spacing:0.05em;
+      border-bottom:1px solid #2d3148;
+    }
+    .log-table td{
+      padding:9px 14px;border-bottom:1px solid #1a1d2e;
+      vertical-align:middle;color:#94a3b8;
+    }
+    .log-table tr:last-child td{border-bottom:none;}
+    .log-table tr:hover td{background:#252840;}
+
+    /* ── BADGE ── */
+    .badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;}
+    .b-success{background:#0f2a1a;color:#4ade80;border:1px solid #14532d;}
+    .b-danger {background:#3b1212;color:#f87171;border:1px solid #7f1d1d;}
+    .b-info   {background:#0d1f3b;color:#93c5fd;border:1px solid #1e3a6e;}
+    .b-warn   {background:#332b00;color:#fbbf24;border:1px solid #713f12;}
+
+    /* ── DANGER ZONE ── */
+    .danger-zone{
+      border:1px solid #7f1d1d;border-radius:12px;
+      padding:18px;margin-top:8px;
+    }
+    .danger-zone-title{
+      font-size:13px;font-weight:500;color:#f87171;margin-bottom:4px;
+    }
+    .danger-zone-desc{font-size:12px;color:#64748b;margin-bottom:14px;}
+
+    /* ── DIVIDER ── */
+    .divider{height:1px;background:#1a1d2e;margin:8px 0;}
+
+    /* ── TOAST ── */
+    #toast{
+      position:fixed;bottom:24px;right:24px;
+      background:#1e2545;border:1px solid #4f6dff;
+      color:#93c5fd;font-size:13px;
+      padding:10px 18px;border-radius:8px;
+      opacity:0;transform:translateY(8px);
+      transition:opacity 0.25s,transform 0.25s;
+      pointer-events:none;z-index:999;
+    }
+    #toast.show{opacity:1;transform:translateY(0);}
+
+    @media(max-width:700px){
+      .sidebar{display:none;}
+      .main{padding:20px 16px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="shield">🛡</div>
+    SecureWatch
+  </div>
+  <div class="nav-links">
+    <a href="ip_monitor.html"  class="nav-link">IP Monitor</a>
+    <a href="attack_logs.html" class="nav-link">Attack Logs</a>
+    <a href="firewall.html"    class="nav-link">Firewall</a>
+    <a href="analysis.html"    class="nav-link">Analysis</a>
+    <a href="reports.html"     class="nav-link">Reports</a>
+    <a href="settings.html"    class="nav-link active">Settings</a>
+  </div>
+  <div class="nav-right">
+    <div class="live-badge"><div class="live-dot"></div> Live</div>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">Account</div>
+    <div class="sidebar-item active" onclick="switchTab(this,'profile')">
+      <span class="s-icon">👤</span> Profile
+    </div>
+    <div class="sidebar-item" onclick="switchTab(this,'security')">
+      <span class="s-icon">🔐</span> Security
+    </div>
+    <div class="sidebar-item" onclick="switchTab(this,'apikeys')">
+      <span class="s-icon">🔑</span> API Keys
+    </div>
+
+    <div class="sidebar-section">Monitoring</div>
+    <div class="sidebar-item" onclick="switchTab(this,'alerts')">
+      <span class="s-icon">🔔</span> Alerts
+      <span class="sidebar-badge">3</span>
+    </div>
+    <div class="sidebar-item" onclick="switchTab(this,'thresholds')">
+      <span class="s-icon">📊</span> Thresholds
+    </div>
+    <div class="sidebar-item" onclick="switchTab(this,'blocklist')">
+      <span class="s-icon">🚫</span> Block List
+    </div>
+
+    <div class="sidebar-section">System</div>
+    <div class="sidebar-item" onclick="switchTab(this,'notifications')">
+      <span class="s-icon">📧</span> Notifications
+    </div>
+    <div class="sidebar-item" onclick="switchTab(this,'logs')">
+      <span class="s-icon">📋</span> Audit Logs
+    </div>
+    <div class="sidebar-item" onclick="switchTab(this,'appearance')">
+      <span class="s-icon">🎨</span> Appearance
+    </div>
+    <div class="sidebar-item" onclick="switchTab(this,'danger')">
+      <span class="s-icon">⚠️</span> Danger Zone
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ── PROFILE ── -->
+    <div class="settings-section active" id="tab-profile">
+      <div class="section-title">Profile</div>
+      <div class="section-desc">Manage your account information and preferences.</div>
+
+      <div class="card">
+        <div class="avatar-wrap">
+          <div class="avatar">AK</div>
+          <div class="avatar-info">
+            <div class="avatar-name">Aryan Kumar</div>
+            <div class="avatar-role">Security Administrator</div>
+            <div class="avatar-email">aryan.kumar@securewatch.io</div>
+          </div>
+          <div style="margin-left:auto;">
+            <button class="btn btn-secondary btn-sm">Change photo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Personal information</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Full name</div>
+            <div class="setting-desc">Your display name across the platform.</div>
+          </div>
+          <div class="setting-control">
+            <input class="setting-input" type="text" value="Aryan Kumar">
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Email address</div>
+            <div class="setting-desc">Used for alerts and account recovery.</div>
+          </div>
+          <div class="setting-control">
+            <input class="setting-input" type="email" value="aryan.kumar@securewatch.io">
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Role</div>
+            <div class="setting-desc">Your permission level within the system.</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>Security Administrator</option>
+              <option>Analyst</option>
+              <option>Read Only</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Timezone</div>
+            <div class="setting-desc">All timestamps will be shown in this timezone.</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>Asia/Kolkata (IST +5:30)</option>
+              <option>UTC</option>
+              <option>America/New_York (EST)</option>
+              <option>Europe/London (GMT)</option>
+              <option>Asia/Dubai (GST +4)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="toast('Profile saved successfully.')">Save changes</button>
+        <button class="btn btn-secondary">Discard</button>
+      </div>
+    </div>
+
+    <!-- ── SECURITY ── -->
+    <div class="settings-section" id="tab-security">
+      <div class="section-title">Security</div>
+      <div class="section-desc">Manage your password, two-factor authentication and session settings.</div>
+
+      <div class="card">
+        <div class="card-header">Password</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Current password</div>
+          </div>
+          <div class="setting-control">
+            <input class="setting-input" type="password" placeholder="••••••••">
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">New password</div>
+            <div class="setting-desc">Minimum 12 characters, include symbols.</div>
+          </div>
+          <div class="setting-control">
+            <input class="setting-input" type="password" placeholder="••••••••">
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Confirm new password</div>
+          </div>
+          <div class="setting-control">
+            <input class="setting-input" type="password" placeholder="••••••••">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Two-factor authentication</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Enable 2FA</div>
+            <div class="setting-desc">Require OTP on every login via authenticator app.</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Backup codes</div>
+            <div class="setting-desc">Generate one-time backup codes for account recovery.</div>
+          </div>
+          <div class="setting-control">
+            <button class="btn btn-secondary btn-sm" onclick="toast('Backup codes downloaded.')">Download codes</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Session management</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Session timeout</div>
+            <div class="setting-desc">Auto-logout after inactivity period.</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>15 minutes</option>
+              <option selected>30 minutes</option>
+              <option>1 hour</option>
+              <option>4 hours</option>
+              <option>Never</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Concurrent sessions</div>
+            <div class="setting-desc">Allow login from multiple devices simultaneously.</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Active sessions</div>
+            <div class="setting-desc">Revoke all other active sessions immediately.</div>
+          </div>
+          <div class="setting-control">
+            <button class="btn btn-warning btn-sm" onclick="toast('All other sessions revoked.')">Revoke all others</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="toast('Security settings saved.')">Save changes</button>
+    </div>
+
+    <!-- ── API KEYS ── -->
+    <div class="settings-section" id="tab-apikeys">
+      <div class="section-title">API Keys</div>
+      <div class="section-desc">Manage API keys for external integrations and automation scripts.</div>
+
+      <div class="card">
+        <div class="card-header">Active keys <span>Keep these secret — treat them like passwords</span></div>
+        <div class="setting-row" style="flex-wrap:wrap;gap:10px;">
+          <div class="setting-info">
+            <div class="setting-label">Production key</div>
+            <div class="setting-desc">Created Apr 2, 2026 · Last used 2 hours ago</div>
+          </div>
+          <div class="api-key-wrap">
+            <div class="api-key-field">sw_prod_••••••••••••••••3f9a</div>
+            <button class="btn btn-secondary btn-sm" onclick="toast('Key copied to clipboard.')">Copy</button>
+            <button class="btn btn-danger btn-sm" onclick="toast('Key revoked.')">Revoke</button>
+          </div>
+        </div>
+        <div class="setting-row" style="flex-wrap:wrap;gap:10px;">
+          <div class="setting-info">
+            <div class="setting-label">Development key</div>
+            <div class="setting-desc">Created Mar 18, 2026 · Last used 5 days ago</div>
+          </div>
+          <div class="api-key-wrap">
+            <div class="api-key-field">sw_dev_••••••••••••••••81cc</div>
+            <button class="btn btn-secondary btn-sm" onclick="toast('Key copied to clipboard.')">Copy</button>
+            <button class="btn btn-danger btn-sm" onclick="toast('Key revoked.')">Revoke</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Generate new key</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Key label</div>
+            <div class="setting-desc">A name to identify this key.</div>
+          </div>
+          <div class="setting-control">
+            <input class="setting-input" type="text" placeholder="e.g. CI/CD Pipeline">
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Permissions</div>
+            <div class="setting-desc">Scope this key's access level.</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>Read only</option>
+              <option>Read + Write</option>
+              <option>Full access</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Expiry</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>30 days</option>
+              <option selected>90 days</option>
+              <option>1 year</option>
+              <option>Never</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="toast('New API key generated and copied.')">Generate key</button>
+    </div>
+
+    <!-- ── ALERTS ── -->
+    <div class="settings-section" id="tab-alerts">
+      <div class="section-title">Alert Rules</div>
+      <div class="section-desc">Configure when and how you receive security alerts.</div>
+
+      <div class="card">
+        <div class="card-header">Active alert rules</div>
+        <div class="rule-row">
+          <div class="rule-dot" style="background:#f87171;box-shadow:0 0 5px #f87171aa;"></div>
+          <div class="rule-label">Critical threat detected</div>
+          <div class="rule-condition">threat == Critical</div>
+          <span class="badge b-success">Active</span>
+          <label class="toggle" style="margin-left:8px;"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+        <div class="rule-row">
+          <div class="rule-dot" style="background:#fb923c;box-shadow:0 0 5px #fb923caa;"></div>
+          <div class="rule-label">DDoS traffic spike</div>
+          <div class="rule-condition">req/s &gt; 50,000</div>
+          <span class="badge b-success">Active</span>
+          <label class="toggle" style="margin-left:8px;"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+        <div class="rule-row">
+          <div class="rule-dot" style="background:#fbbf24;box-shadow:0 0 5px #fbbf24aa;"></div>
+          <div class="rule-label">Brute force attempt</div>
+          <div class="rule-condition">login_fail &gt; 100</div>
+          <span class="badge b-success">Active</span>
+          <label class="toggle" style="margin-left:8px;"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+        <div class="rule-row">
+          <div class="rule-dot" style="background:#60a5fa;"></div>
+          <div class="rule-label">New unknown IP</div>
+          <div class="rule-condition">type == Unknown</div>
+          <span class="badge b-warn">Paused</span>
+          <label class="toggle" style="margin-left:8px;"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+        <div class="rule-row">
+          <div class="rule-dot" style="background:#a78bfa;box-shadow:0 0 5px #a78bfaaa;"></div>
+          <div class="rule-label">RCE payload detected</div>
+          <div class="rule-condition">type == RCE</div>
+          <span class="badge b-success">Active</span>
+          <label class="toggle" style="margin-left:8px;"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Alert delivery</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Email alerts</div>
+            <div class="setting-desc">Send email for Critical and High events.</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Slack webhook</div>
+            <div class="setting-desc">Post alerts to your Slack channel.</div>
+          </div>
+          <div class="setting-control" style="display:flex;gap:8px;">
+            <input class="setting-input" type="text" placeholder="https://hooks.slack.com/..." style="width:220px;">
+            <button class="btn btn-secondary btn-sm" onclick="toast('Webhook tested successfully.')">Test</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Alert cooldown</div>
+            <div class="setting-desc">Minimum time between repeated alerts for same IP.</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>No cooldown</option>
+              <option>1 minute</option>
+              <option selected>5 minutes</option>
+              <option>15 minutes</option>
+              <option>1 hour</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="toast('Alert rules saved.')">Save rules</button>
+    </div>
+
+    <!-- ── THRESHOLDS ── -->
+    <div class="settings-section" id="tab-thresholds">
+      <div class="section-title">Thresholds</div>
+      <div class="section-desc">Define limits that trigger automatic blocking or escalation.</div>
+
+      <div class="card">
+        <div class="card-header">Auto-block thresholds</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Requests per second (block)</div>
+            <div class="setting-desc">Auto-block IPs exceeding this req/s rate.</div>
+          </div>
+          <div class="setting-control">
+            <div class="range-wrap">
+              <input type="range" min="100" max="100000" step="100" value="50000" oninput="this.nextElementSibling.textContent=Number(this.value).toLocaleString()">
+              <span class="range-val">50,000</span>
+            </div>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Failed login attempts (block)</div>
+            <div class="setting-desc">Block after this many failed logins from one IP.</div>
+          </div>
+          <div class="setting-control">
+            <div class="range-wrap">
+              <input type="range" min="5" max="500" step="5" value="100" oninput="this.nextElementSibling.textContent=this.value">
+              <span class="range-val">100</span>
+            </div>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Block duration (minutes)</div>
+            <div class="setting-desc">How long a blocked IP stays blocked.</div>
+          </div>
+          <div class="setting-control">
+            <div class="range-wrap">
+              <input type="range" min="1" max="1440" step="1" value="60" oninput="this.nextElementSibling.textContent=this.value+'m'">
+              <span class="range-val">60m</span>
+            </div>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Risk score escalation</div>
+            <div class="setting-desc">Escalate to critical alert when risk score exceeds this.</div>
+          </div>
+          <div class="setting-control">
+            <div class="range-wrap">
+              <input type="range" min="1" max="100" step="1" value="70" oninput="this.nextElementSibling.textContent=this.value">
+              <span class="range-val">70</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Auto-actions</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Auto-block on Critical threat</div>
+            <div class="setting-desc">Immediately block IPs classified as Critical.</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Auto-block Tor exit nodes</div>
+            <div class="setting-desc">Block all known Tor exit node IPs automatically.</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Auto-block entire subnet on attack</div>
+            <div class="setting-desc">Block the /24 subnet when 3+ IPs from it attack.</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="toast('Threshold settings saved.')">Save thresholds</button>
+    </div>
+
+    <!-- ── BLOCK LIST ── -->
+    <div class="settings-section" id="tab-blocklist">
+      <div class="section-title">Block List</div>
+      <div class="section-desc">Manually manage blocked IPs, CIDRs, and countries.</div>
+
+      <div class="card">
+        <div class="card-header">Blocked IPs & CIDRs <span>Add individual IPs or CIDR ranges</span></div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Add entry</div>
+            <div class="setting-desc">Enter an IP (185.220.101.47) or CIDR (185.220.101.0/24).</div>
+          </div>
+          <div class="setting-control" style="display:flex;gap:8px;">
+            <input class="setting-input" type="text" placeholder="IP or CIDR range" id="ip-input">
+            <button class="btn btn-danger btn-sm" onclick="addTag()">Block</button>
+          </div>
+        </div>
+        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+          <div class="setting-label">Currently blocked</div>
+          <div class="tag-wrap" id="tag-container">
+            <span class="tag">185.220.101.0/24 <span class="tag-remove" onclick="removeTag(this)">×</span></span>
+            <span class="tag">194.165.16.11 <span class="tag-remove" onclick="removeTag(this)">×</span></span>
+            <span class="tag">31.13.90.44 <span class="tag-remove" onclick="removeTag(this)">×</span></span>
+            <span class="tag">45.142.212.18 <span class="tag-remove" onclick="removeTag(this)">×</span></span>
+            <span class="tag">77.83.247.7 <span class="tag-remove" onclick="removeTag(this)">×</span></span>
+            <span class="tag">79.137.192.9 <span class="tag-remove" onclick="removeTag(this)">×</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Blocked countries <span>Block all traffic from selected countries</span></div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">🇰🇵 North Korea</div></div>
+          <div class="setting-control"><label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">🇮🇷 Iran</div></div>
+          <div class="setting-control"><label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">🇷🇺 Russia</div></div>
+          <div class="setting-control"><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">🇨🇳 China</div></div>
+          <div class="setting-control"><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="toast('Block list updated.')">Save block list</button>
+    </div>
+
+    <!-- ── NOTIFICATIONS ── -->
+    <div class="settings-section" id="tab-notifications">
+      <div class="section-title">Notifications</div>
+      <div class="section-desc">Control which events trigger notifications and through which channels.</div>
+
+      <div class="card">
+        <div class="card-header">Notification channels</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Email notifications</div>
+            <div class="setting-desc">aryan.kumar@securewatch.io</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Browser push</div>
+            <div class="setting-desc">Desktop notifications when browser is open.</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">SMS alerts</div>
+            <div class="setting-desc">Critical alerts via SMS. Additional charges may apply.</div>
+          </div>
+          <div class="setting-control" style="display:flex;gap:8px;align-items:center;">
+            <input class="setting-input" type="text" placeholder="+91 00000 00000" style="width:160px;">
+            <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Notify me when…</div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">Critical attack detected</div></div>
+          <div class="setting-control"><label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">IP auto-blocked</div></div>
+          <div class="setting-control"><label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">Risk score exceeds threshold</div></div>
+          <div class="setting-control"><label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">New unknown IP connects</div></div>
+          <div class="setting-control"><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">Weekly summary report</div></div>
+          <div class="setting-control"><label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="toast('Notification preferences saved.')">Save preferences</button>
+    </div>
+
+    <!-- ── AUDIT LOGS ── -->
+    <div class="settings-section" id="tab-logs">
+      <div class="section-title">Audit Logs</div>
+      <div class="section-desc">A record of all administrative actions taken in SecureWatch.</div>
+
+      <div class="card">
+        <div class="card-header">Recent activity <span>Last 30 days</span></div>
+        <table class="log-table">
+          <thead>
+            <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">2026-04-14 09:38</td><td>aryan.kumar</td><td>IP Blocked</td><td>5.34.180.195</td><td><span class="badge b-danger">Blocked</span></td></tr>
+            <tr><td class="mono">2026-04-14 09:25</td><td>aryan.kumar</td><td>Rule Updated</td><td>DDoS threshold</td><td><span class="badge b-success">Saved</span></td></tr>
+            <tr><td class="mono">2026-04-14 08:55</td><td>system</td><td>Auto-blocked</td><td>31.13.90.44</td><td><span class="badge b-danger">Blocked</span></td></tr>
+            <tr><td class="mono">2026-04-13 22:10</td><td>aryan.kumar</td><td>Login</td><td>settings.html</td><td><span class="badge b-success">Success</span></td></tr>
+            <tr><td class="mono">2026-04-13 18:44</td><td>aryan.kumar</td><td>API Key Generated</td><td>sw_dev_…81cc</td><td><span class="badge b-info">Created</span></td></tr>
+            <tr><td class="mono">2026-04-13 14:21</td><td>aryan.kumar</td><td>Block list updated</td><td>185.220.101.0/24</td><td><span class="badge b-success">Saved</span></td></tr>
+            <tr><td class="mono">2026-04-12 11:05</td><td>system</td><td>Auto-blocked</td><td>194.165.16.11</td><td><span class="badge b-danger">Blocked</span></td></tr>
+            <tr><td class="mono">2026-04-12 09:30</td><td>aryan.kumar</td><td>Alert rule created</td><td>Brute force rule</td><td><span class="badge b-success">Saved</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary" onclick="toast('Audit logs exported.')">Export CSV</button>
+        <button class="btn btn-secondary" onclick="toast('Logs cleared.')">Clear old logs</button>
+      </div>
+    </div>
+
+    <!-- ── APPEARANCE ── -->
+    <div class="settings-section" id="tab-appearance">
+      <div class="section-title">Appearance</div>
+      <div class="section-desc">Customize how SecureWatch looks and feels.</div>
+
+      <div class="card">
+        <div class="card-header">Theme</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Color theme</div>
+            <div class="setting-desc">Choose your interface theme.</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option selected>Dark (default)</option>
+              <option>Light</option>
+              <option>System preference</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Accent color</div>
+            <div class="setting-desc">Primary action color used across the UI.</div>
+          </div>
+          <div class="setting-control">
+            <div class="color-row">
+              <div class="color-swatch" style="background:#4f6dff;" title="Blue (default)" onclick="setAccent('#4f6dff',this)"></div>
+              <div class="color-swatch" style="background:#a855f7;" title="Purple" onclick="setAccent('#a855f7',this)"></div>
+              <div class="color-swatch" style="background:#10b981;" title="Emerald" onclick="setAccent('#10b981',this)"></div>
+              <div class="color-swatch" style="background:#f59e0b;" title="Amber" onclick="setAccent('#f59e0b',this)"></div>
+              <div class="color-swatch" style="background:#ef4444;" title="Red" onclick="setAccent('#ef4444',this)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Display</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Rows per page</div>
+            <div class="setting-desc">Default number of rows in tables.</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>8</option>
+              <option selected>10</option>
+              <option>20</option>
+              <option>50</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Compact mode</div>
+            <div class="setting-desc">Reduce padding for denser information display.</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Animate charts</div>
+            <div class="setting-desc">Enable entrance animations on charts and graphs.</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Show live dot in nav</div>
+            <div class="setting-desc">Display the animated live indicator in the navbar.</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="toast('Appearance settings saved.')">Save appearance</button>
+    </div>
+
+    <!-- ── DANGER ZONE ── -->
+    <div class="settings-section" id="tab-danger">
+      <div class="section-title">Danger Zone</div>
+      <div class="section-desc">Irreversible actions — proceed with caution.</div>
+
+      <div class="danger-zone">
+        <div class="danger-zone-title">Clear all blocked IPs</div>
+        <div class="danger-zone-desc">Removes every manually and auto-blocked IP from the block list. All previously blocked IPs will be allowed again immediately.</div>
+        <button class="btn btn-danger" onclick="confirm('Are you sure? This will unblock all IPs.') && toast('All blocked IPs cleared.')">Clear block list</button>
+      </div>
+
+      <div class="danger-zone" style="margin-top:12px;">
+        <div class="danger-zone-title">Reset all alert rules</div>
+        <div class="danger-zone-desc">Deletes all custom alert rules and resets thresholds to factory defaults. This cannot be undone.</div>
+        <button class="btn btn-danger" onclick="confirm('Reset all alert rules to defaults?') && toast('Alert rules reset to defaults.')">Reset rules</button>
+      </div>
+
+      <div class="danger-zone" style="margin-top:12px;">
+        <div class="danger-zone-title">Purge all logs</div>
+        <div class="danger-zone-desc">Permanently deletes all attack logs, IP monitor history, and audit trails. This action is irreversible.</div>
+        <button class="btn btn-danger" onclick="confirm('Permanently delete ALL logs? This cannot be undone.') && toast('All logs purged.')">Purge logs</button>
+      </div>
+
+      <div class="danger-zone" style="margin-top:12px;">
+        <div class="danger-zone-title">Delete account</div>
+        <div class="danger-zone-desc">Permanently deletes your SecureWatch account, all data, API keys, and configurations. There is no recovery.</div>
+        <button class="btn btn-danger" onclick="confirm('Permanently delete your account? This CANNOT be undone.') && toast('Account deletion requested.')">Delete account</button>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+function switchTab(el, id){
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
+  document.querySelectorAll('.settings-section').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+function addTag(){
+  const input=document.getElementById('ip-input');
+  const val=input.value.trim();
+  if(!val) return;
+  const container=document.getElementById('tag-container');
+  const span=document.createElement('span');
+  span.className='tag';
+  span.innerHTML=`${val} <span class="tag-remove" onclick="removeTag(this)">×</span>`;
+  container.appendChild(span);
+  input.value='';
+  toast(`${val} added to block list.`);
+}
+
+function removeTag(el){
+  const tag=el.parentElement;
+  const val=tag.textContent.replace('×','').trim();
+  tag.remove();
+  toast(`${val} removed from block list.`);
+}
+
+document.getElementById('ip-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter') addTag();
+});
+
+function setAccent(color, el){
+  document.querySelectorAll('.color-swatch').forEach(s=>s.style.outline='none');
+  el.style.outline=`2px solid ${color}`;
+  el.style.outlineOffset='2px';
+  toast('Accent color updated.');
+}
+</script>
+</body>
+</html>

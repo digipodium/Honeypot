@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alerts — SecureWatch</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f1117;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        /* ── NAV ── */
+        nav {
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            background: #16192a;
+            border-bottom: 1px solid #2d3148;
+            height: 52px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            font-size: 15px;
+            font-weight: 700;
+            color: #f1f5f9;
+            letter-spacing: -0.02em;
+            margin-right: 32px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-brand .shield {
+            width: 22px;
+            height: 22px;
+            background: #4f6dff;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2px;
+        }
+
+        .nav-link {
+            font-size: 13px;
+            color: #64748b;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: background 0.15s, color 0.15s;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            background: #252840;
+            color: #cbd5e1;
+        }
+
+        .nav-link.active {
+            background: #252840;
+            color: #f1f5f9;
+        }
+
+        .nav-notif {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #f87171;
+        }
+
+        .nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: #4ade80;
+            background: #0f2a1a;
+            border: 1px solid #14532d;
+            border-radius: 99px;
+            padding: 3px 10px;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+        }
+
+        /* ── PAGE ── */
+        .page {
+            padding: 24px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            font-size: 12px;
+            padding: 7px 14px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s;
+        }
+
+        .btn-primary {
+            border: 1px solid #4f6dff;
+            background: #4f6dff;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #3b56e0;
+        }
+
+        .btn-secondary {
+            border: 1px solid #2d3148;
+            background: transparent;
+            color: #94a3b8;
+        }
+
+        .btn-secondary:hover {
+            background: #252840;
+        }
+
+        .btn-danger {
+            border: 1px solid #7f1d1d;
+            background: #3b1212;
+            color: #f87171;
+        }
+
+        .btn-danger:hover {
+            background: #4b1a1a;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+
+        /* ── METRICS ── */
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .metric {
+            background: #1e2130;
+            border: 1px solid #2d3148;
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .metric:hover {
+            border-color: #4f6dff;
+        }
+
+        .metric.selected {
+            border-color: #4f6dff;
+            background: #1e2545;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .mv-red {
+            color: #f87171;
+        }
+
+        .mv-amber {
+            color: #fbbf24;
+        }
+
+        .mv-blue {
+            color: #60a5fa;
+        }
+
+        .mv-green {
+            color: #4ade80;
+        }
+
+        .mv-purple {
+            color: #a78bfa;
+        }
+
+        /* ── CONTROLS ── */
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .controls input,
+        .controls select {
+            font-size: 13px;
+            padding: 7px 12px;
+            border: 1px solid #2d3148;
+            border-radius: 8px;
+            background: #1e2130;
+            color: #e2e8f0;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .controls input {
+            width: 210px;
+        }
+
+        .controls input:focus,
+        .controls select:focus {
+            border-color: #4f6dff;
+        }
+
+        .mark-all {
+            margin-left: auto;
+            font-size: 12px;
+            color: #475569;
+            cursor: pointer;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            font-family: inherit;
+        }
+
+        .mark-all:hover {
+            color: #94a3b8;
+        }
+
+        /* ── ALERT FEED ── */
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .alert-card {
+            background: #1e2130;
+            border: 1px solid #2d3148;
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.15s;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-card:hover {
+            border-color: #3d4163;
+            transform: translateY(-1px);
+        }
+
+        .alert-card.unread {
+            border-left: 3px solid;
+        }
+
+        .alert-card.unread.critical {
+            border-left-color: #f87171;
+        }
+
+        .alert-card.unread.high {
+            border-left-color: #fb923c;
+        }
+
+        .alert-card.unread.medium {
+            border-left-color: #fbbf24;
+        }
+
+        .alert-card.unread.low {
+            border-left-color: #4ade80;
+        }
+
+        .alert-card.unread.info {
+            border-left-color: #60a5fa;
+        }
+
+        .alert-inner {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 16px;
+            cursor: pointer;
+        }
+
+        .alert-icon-wrap {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-top: 1px;
+        }
+
+        .ic-critical {
+            background: #3b1212;
+        }
+
+        .ic-high {
+            background: #3b1f0d;
+        }
+
+        .ic-medium {
+            background: #332b00;
+        }
+
+        .ic-low {
+            background: #0f2a1a;
+        }
+
+        .ic-info {
+            background: #0d1f3b;
+        }
+
+        .alert-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .alert-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+
+        .alert-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #f1f5f9;
+        }
+
+        .alert-title.read {
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .alert-time {
+            font-size: 11px;
+            color: #475569;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+
+        .alert-desc {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.55;
+            margin-bottom: 6px;
+        }
+
+        .alert-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 99px;
+        }
+
+        .b-critical {
+            background: #3b1212;
+            color: #f87171;
+            border: 1px solid #7f1d1d;
+        }
+
+        .b-high {
+            background: #3b1f0d;
+            color: #fb923c;
+            border: 1px solid #7c2d12;
+        }
+
+        .b-medium {
+            background: #332b00;
+            color: #fbbf24;
+            border: 1px solid #713f12;
+        }
+
+        .b-low {
+            background: #0f2a1a;
+            color: #4ade80;
+            border: 1px solid #14532d;
+        }
+
+        .b-info {
+            background: #0d1f3b;
+            color: #93c5fd;
+            border: 1px solid #1e3a6e;
+        }
+
+        .at-sqli {
+            background: #3b1212;
+            color: #fca5a5;
+            border: 1px solid #7f1d1d;
+        }
+
+        .at-xss {
+            background: #332b00;
+            color: #fde68a;
+            border: 1px solid #713f12;
+        }
+
+        .at-ddos {
+            background: #0d1f3b;
+            color: #93c5fd;
+            border: 1px solid #1e3a6e;
+        }
+
+        .at-brute {
+            background: #2a1630;
+            color: #d8b4fe;
+            border: 1px solid #6b21a8;
+        }
+
+        .at-rce {
+            background: #3b0d24;
+            color: #f9a8d4;
+            border: 1px solid #831843;
+        }
+
+        .at-recon {
+            background: #1a1d2e;
+            color: #94a3b8;
+            border: 1px solid #334155;
+        }
+
+        .at-system {
+            background: #1e2545;
+            color: #60a5fa;
+            border: 1px solid #1e3a6e;
+        }
+
+        .alert-ip {
+            font-size: 11px;
+            font-family: monospace;
+            color: #475569;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .unread-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 14px;
+        }
+
+        /* Expanded detail */
+        .alert-detail {
+            display: none;
+            padding: 0 16px 14px 66px;
+            border-top: 1px solid #1a1d2e;
+        }
+
+        .alert-detail.open {
+            display: block;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .detail-item {
+            background: #16192a;
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+        .detail-item-label {
+            font-size: 10px;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 3px;
+        }
+
+        .detail-item-val {
+            font-size: 12px;
+            color: #cbd5e1;
+            font-family: monospace;
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        /* ── PAGINATION ── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .pg-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .pg-btn {
+            font-size: 12px;
+            padding: 5px 12px;
+            border: 1px solid #2d3148;
+            border-radius: 6px;
+            background: transparent;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .pg-btn:hover:not(:disabled) {
+            background: #2d3148;
+        }
+
+        .pg-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        /* ── EMPTY ── */
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        /* ── TOAST ── */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1e2545;
+            border: 1px solid #4f6dff;
+            color: #93c5fd;
+            font-size: 13px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.25s, transform 0.25s;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── SOUND TOGGLE ── */
+        .sound-btn {
+            font-size: 12px;
+            padding: 6px 12px;
+            border: 1px solid #2d3148;
+            border-radius: 7px;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .sound-btn.on {
+            color: #4ade80;
+            border-color: #14532d;
+            background: #0f2a1a;
+        }
+
+        @media(max-width:600px) {
+            .alert-actions {
+                display: none;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAV -->
+    <nav>
+        <div class="nav-brand">
+            <div class="shield">🛡</div>
+            SecureWatch
+        </div>
+        <div class="nav-links">
+            <a href="/IPmonitor" class="nav-link">IP Monitor</a>
+            <a href="/attacklogs" class="nav-link">Attack Logs</a>
+            <a href="/analysis" class="nav-link">Analysis</a>
+            <a href="/alerts" class="nav-link active">Alerts <div class="nav-notif"></div></a>
+            <a href="/settings" class="nav-link">Settings</a>
+        </div>
+        <div class="nav-right">
+            <button class="sound-btn" id="sound-btn" onclick="toggleSound()">🔕 Sound off</button>
+            <div class="live-badge">
+                <div class="live-dot"></div> Live
+            </div>
+        </div>
+    </nav>
+
+    <!-- PAGE -->
+    <div class="page">
+
+        <!-- Header -->
+        <div class="page-header">
+            <div>
+                <h1>Alerts</h1>
+                <div class="subtitle">Real-time security alerts — <span id="unread-count"
+                        style="color:#f87171;font-weight:500;">8 unread</span></div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-secondary" onclick="markAllRead()">Mark all read</button>
+                <button class="btn btn-danger btn-sm" onclick="clearAll()">Clear all</button>
+                <button class="btn btn-primary" id="simulate-btn" onclick="simulateAlert()">+ Simulate alert</button>
+            </div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="metrics">
+            <div class="metric selected" onclick="filterBySev('',this)">
+                <div class="metric-label">Total alerts</div>
+                <div class="metric-value mv-blue" id="m-total">0</div>
+            </div>
+            <div class="metric" onclick="filterBySev('Critical',this)">
+                <div class="metric-label">Critical</div>
+                <div class="metric-value mv-red" id="m-critical">0</div>
+            </div>
+            <div class="metric" onclick="filterBySev('High',this)">
+                <div class="metric-label">High</div>
+                <div class="metric-value mv-amber" id="m-high">0</div>
+            </div>
+            <div class="metric" onclick="filterBySev('Medium',this)">
+                <div class="metric-label">Medium</div>
+                <div class="metric-value mv-amber" id="m-medium">0</div>
+            </div>
+            <div class="metric" onclick="filterBySev('Low',this)">
+                <div class="metric-label">Low</div>
+                <div class="metric-value mv-green" id="m-low">0</div>
+            </div>
+            <div class="metric" onclick="filterBySev('',this,'unread')">
+                <div class="metric-label">Unread</div>
+                <div class="metric-value mv-purple" id="m-unread">0</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <input type="text" id="search" placeholder="Search alerts, IPs, types..." oninput="renderFeed()">
+            <select id="f-sev" onchange="renderFeed()">
+                <option value="">All severities</option>
+                <option>Critical</option>
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
+                <option>Info</option>
+            </select>
+            <select id="f-type" onchange="renderFeed()">
+                <option value="">All types</option>
+                <option>DDoS</option>
+                <option>SQLi</option>
+                <option>XSS</option>
+                <option>Brute Force</option>
+                <option>RCE</option>
+                <option>Recon</option>
+                <option>System</option>
+            </select>
+            <select id="f-status" onchange="renderFeed()">
+                <option value="">All</option>
+                <option value="unread">Unread only</option>
+                <option value="read">Read only</option>
+            </select>
+            <button class="mark-all btn btn-secondary btn-sm" onclick="markAllRead()">✓ Mark all read</button>
+        </div>
+
+        <!-- Feed -->
+        <div class="feed" id="feed"></div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <span id="pg-info"></span>
+            <div class="pg-btns">
+                <button class="pg-btn" id="btn-prev" onclick="changePage(-1)">← Prev</button>
+                <button class="pg-btn" id="btn-next" onclick="changePage(1)">Next →</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        /* ── DATA ── */
+        let ALERTS = [
+            { id: 1, sev: "Critical", type: "DDoS", title: "Massive DDoS flood detected", desc: "IP 31.13.90.44 (CN) launched an HTTP flood generating 210,000 requests/sec. Bandwidth spiked to 9.8 Gbps. Auto-block triggered.", ip: "31.13.90.44", country: "🇨🇳 CN", time: "09:36:27", target: "/", action: "Blocked", read: false, details: { port: "80", protocol: "HTTP", duration: "4m 12s", bandwidth: "9.8 Gbps" } },
+            { id: 2, sev: "Critical", type: "RCE", title: "Remote code execution attempt", desc: "IP 5.34.180.195 (AZ) attempted to execute wget malware.sh | bash via a PHP shell upload on /shell.php. Payload intercepted.", ip: "5.34.180.195", country: "🇦🇿 AZ", time: "09:38:50", target: "/shell.php", action: "Blocked", read: false, details: { port: "443", protocol: "HTTPS", duration: "0m 03s", bandwidth: "0.2 Mbps" } },
+            { id: 3, sev: "Critical", type: "SQLi", title: "SQL injection on /checkout", desc: "IP 103.253.145.5 (IN) injected '; DROP TABLE orders-- into the checkout endpoint. WAF rule triggered, request blocked immediately.", ip: "103.253.145.5", country: "🇮🇳 IN", time: "09:21:11", target: "/checkout", action: "Blocked", read: false, details: { port: "443", protocol: "HTTPS", duration: "0m 01s", bandwidth: "0.1 Mbps" } },
+            { id: 4, sev: "Critical", type: "DDoS", title: "SYN flood from Iranian IP", desc: "IP 194.165.16.11 (IR) initiated a SYN flood at 92,000 req/s. Edge firewall auto-blocked after 18 seconds of sustained traffic.", ip: "194.165.16.11", country: "🇮🇷 IR", time: "09:07:03", target: "/", action: "Blocked", read: false, details: { port: "443", protocol: "TCP", duration: "18s", bandwidth: "8.2 Gbps" } },
+            { id: 5, sev: "Critical", type: "RCE", title: "Path traversal on /admin/config", desc: "IP 79.137.192.9 (PL) attempted ../../etc/passwd path traversal. Access to server configuration blocked by WAF.", ip: "79.137.192.9", country: "🇵🇱 PL", time: "09:25:37", target: "/admin/config", action: "Blocked", read: true, details: { port: "80", protocol: "HTTP", duration: "0m 01s", bandwidth: "0.1 Mbps" } },
+            { id: 6, sev: "High", type: "Brute Force", title: "Brute force on /login", desc: "IP 185.220.101.47 (RU) attempted 520 password combinations against /login over 3 minutes. Account lockout triggered after 100 attempts.", ip: "185.220.101.47", country: "🇷🇺 RU", time: "09:01:32", target: "/login", action: "Blocked", read: false, details: { port: "443", protocol: "HTTPS", duration: "3m 14s", bandwidth: "0.9 Gbps" } },
+            { id: 7, sev: "High", type: "SQLi", title: "UNION SELECT on /api/orders", desc: "IP 62.210.115.8 (FR) sent UNION SELECT * FROM users payload targeting the orders API. Request blocked, database untouched.", ip: "62.210.115.8", country: "🇫🇷 FR", time: "09:17:04", target: "/api/orders", action: "Blocked", read: false, details: { port: "443", protocol: "HTTPS", duration: "0m 02s", bandwidth: "0.3 Mbps" } },
+            { id: 8, sev: "High", type: "DDoS", title: "UDP flood from Brazil", desc: "IP 45.14.48.200 (BR) launched a UDP flood at 40,000 req/s. Traffic anomaly detected — IP flagged and alerted for manual review.", ip: "45.14.48.200", country: "🇧🇷 BR", time: "09:23:00", target: "/", action: "Alerted", read: false, details: { port: "*", protocol: "UDP", duration: "6m 40s", bandwidth: "2.1 Gbps" } },
+            { id: 9, sev: "High", type: "Brute Force", title: "WordPress admin brute force", desc: "IP 185.220.102.8 (NL) attempted 310 credential combinations against /wp-admin. Auto-blocked after 100 failed attempts.", ip: "185.220.102.8", country: "🇳🇱 NL", time: "09:15:30", target: "/wp-admin", action: "Blocked", read: true, details: { port: "443", protocol: "HTTPS", duration: "2m 01s", bandwidth: "0.4 Gbps" } },
+            { id: 10, sev: "High", type: "Brute Force", title: "Token enumeration on /reset", desc: "IP 104.156.155.11 (US) cycled through 90 password reset tokens on /reset endpoint. Rate limit triggered, IP placed under watch.", ip: "104.156.155.11", country: "🇺🇸 US", time: "09:43:31", target: "/reset", action: "Watching", read: true, details: { port: "443", protocol: "HTTPS", duration: "1m 22s", bandwidth: "0.1 Gbps" } },
+            { id: 11, sev: "Medium", type: "XSS", title: "XSS probe on /search", desc: "IP 91.108.4.100 (DE) injected <script>alert(1)</script>
+    into the search parameter. Input sanitized by WAF. Request logged and alerted.", ip:"91.108.4.100", country:"🇩🇪
+    DE", time:"09:05:47", target:"/search", action:"Alerted", read:true, details:{port:"80",protocol:"HTTP",duration:"0m
+    01s",bandwidth:"0.1 Mbps"}},
+    {id:12, sev:"Medium", type:"XSS", title:"Cookie theft attempt on /api/data", desc:"IP 144.76.45.22 (DE) injected
+    javascript:alert(document.cookie) targeting the data API. Payload blocked, session uncompromised.",
+    ip:"144.76.45.22", country:"🇩🇪 DE", time:"09:31:42", target:"/api/data", action:"Alerted", read:true,
+    details:{port:"443",protocol:"HTTPS",duration:"0m 01s",bandwidth:"0.1 Mbps"}},
+    {id:13, sev:"Medium", type:"Brute Force", title:"Credential stuffing on /login", desc:"IP 212.119.34.100 (RO) sent
+    admin'-- credential stuffing payload. WAF identified SQLi pattern within auth flow — double threat blocked.",
+    ip:"212.119.34.100",country:"🇷🇴 RO", time:"09:34:05", target:"/login", action:"Blocked", read:true,
+    details:{port:"443",protocol:"HTTPS",duration:"0m 04s",bandwidth:"0.3 Mbps"}},
+    {id:14, sev:"Low", type:"Recon", title:"Full port scan detected", desc:"IP 104.248.232.55 (US) performed a Nmap scan
+    across all 65,535 ports. No active exploitation detected — IP flagged for monitoring.",
+    ip:"104.248.232.55",country:"🇺🇸 US", time:"09:10:22", target:"*", action:"Watching", read:true,
+    details:{port:"0-65535",protocol:"TCP",duration:"12m 00s",bandwidth:"0.1 Gbps"}},
+    {id:15, sev:"Low", type:"Recon", title:"Shodan crawler identified", desc:"IP 92.118.35.8 (TR) identified as a Shodan
+    internet crawler. No malicious payload detected. Logged for awareness.", ip:"92.118.35.8", country:"🇹🇷 TR",
+    time:"09:29:14", target:"/", action:"Passed", read:true, details:{port:"80,443",protocol:"HTTP/HTTPS",duration:"2m
+    10s",bandwidth:"0.0 Gbps"}},
+    {id:16, sev:"Info", type:"System", title:"Auto-block rule triggered (×3)", desc:"Three IPs from subnet
+    185.220.101.0/24 triggered the auto-block rule within 10 minutes. Entire /24 CIDR range added to block list.",
+    ip:"185.220.101.x", country:"🇷🇺 RU", time:"09:02:00", target:"system", action:"System", read:true,
+    details:{port:"—",protocol:"—",duration:"—",bandwidth:"—"}},
+    {id:17, sev:"Info", type:"System", title:"Risk score escalated to 74 (High)", desc:"Cumulative attack frequency over
+    the last hour pushed the risk score from 61 to 74, crossing the High threshold. Review recommended.", ip:"—",
+    country:"—", time:"09:20:00", target:"system", action:"System", read:true,
+    details:{port:"—",protocol:"—",duration:"—",bandwidth:"—"}},
+    {id:18, sev:"Critical", type:"SQLi", title:"SQL injection — user table targeted", desc:"IP 45.142.212.18 (CN) sent '
+    OR 1=1-- injection against /api/users. WAF intercepted. No data exfiltrated.", ip:"45.142.212.18", country:"🇨🇳
+    CN", time:"09:03:14", target:"/api/users", action:"Blocked", read:false,
+    details:{port:"443",protocol:"HTTPS",duration:"0m 01s",bandwidth:"0.7 Gbps"}},
+    ];
+
+    let page = 1;
+    const PER_PAGE = 8;
+    let activeFilter = '';
+    let soundOn = false;
+
+    /* ── HELPERS ── */
+    const SEV_ORDER = {Critical:0,High:1,Medium:2,Low:3,Info:4};
+    const TYPE_CLASS = {DDoS:'at-ddos',SQLi:'at-sqli',XSS:'at-xss','Brute
+    Force':'at-brute',RCE:'at-rce',Recon:'at-recon',System:'at-system'};
+    const SEV_CLASS = {Critical:'b-critical',High:'b-high',Medium:'b-medium',Low:'b-low',Info:'b-info'};
+    const IC_CLASS = {Critical:'ic-critical',High:'ic-high',Medium:'ic-medium',Low:'ic-low',Info:'ic-info'};
+    const ICONS = {DDoS:'🌊',SQLi:'🛢',XSS:'🧨','Brute Force':'🔓',RCE:'💀',Recon:'🔍',System:'⚙️'};
+    const ACTION_COLOR = {Blocked:'#f87171',Alerted:'#fbbf24',Watching:'#60a5fa',Passed:'#4ade80',System:'#a78bfa'};
+
+    function getFiltered(){
+    const q = document.getElementById('search').value.toLowerCase();
+    const fsev= document.getElementById('f-sev').value;
+    const ftyp= document.getElementById('f-type').value;
+    const fst = document.getElementById('f-status').value;
+    return ALERTS
+    .filter(a=>
+    (!q || a.title.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q) || a.ip.includes(q) ||
+    a.type.toLowerCase().includes(q)) &&
+    (!fsev || a.sev===fsev) &&
+    (!ftyp || a.type===ftyp) &&
+    (!fst || (fst==='unread'? !a.read : a.read)) &&
+    (!activeFilter || a.sev===activeFilter)
+    )
+    .sort((a,b)=> SEV_ORDER[a.sev]-SEV_ORDER[b.sev] || (a.read?1:-1));
+    }
+
+    function updateMetrics(){
+    const all = ALERTS;
+    document.getElementById('m-total').textContent = all.length;
+    document.getElementById('m-critical').textContent= all.filter(a=>a.sev==='Critical').length;
+    document.getElementById('m-high').textContent = all.filter(a=>a.sev==='High').length;
+    document.getElementById('m-medium').textContent = all.filter(a=>a.sev==='Medium').length;
+    document.getElementById('m-low').textContent = all.filter(a=>a.sev==='Low').length;
+    const unread = all.filter(a=>!a.read).length;
+    document.getElementById('m-unread').textContent = unread;
+    document.getElementById('unread-count').textContent = unread + (unread===1?' unread':' unread');
+    }
+
+    function renderFeed(){
+    const data = getFiltered();
+    const total = data.length;
+    const start = (page-1)*PER_PAGE;
+    const slice = data.slice(start, start+PER_PAGE);
+    const feed = document.getElementById('feed');
+
+    if(!slice.length){
+    feed.innerHTML=`<div class="empty">
+        <div class="empty-icon">🔕</div>No alerts match the current filters.
+    </div>`;
+    } else {
+    feed.innerHTML = slice.map(a=>`
+    <div class="alert-card ${a.read?'':'unread'} ${a.sev.toLowerCase()}" id="card-${a.id}">
+        <div class="alert-inner" onclick="toggleDetail(${a.id})">
+            <div class="alert-icon-wrap ${IC_CLASS[a.sev]}">${ICONS[a.type]||'🔔'}</div>
+            <div class="alert-body">
+                <div class="alert-top">
+                    <span class="alert-title ${a.read?'read':''}">${a.read?'':' '} ${a.title}</span>
+                    ${!a.read?`<span
+                        style="width:7px;height:7px;border-radius:50%;background:#f87171;display:inline-block;flex-shrink:0;"></span>`:''}
+                    <span class="alert-time">${a.time}</span>
+                </div>
+                <div class="alert-desc">${a.desc}</div>
+                <div class="alert-meta">
+                    <span class="badge ${SEV_CLASS[a.sev]}">${a.sev}</span>
+                    <span class="badge ${TYPE_CLASS[a.type]||'at-system'}">${a.type}</span>
+                    ${a.ip!=='—'?`<span class="alert-ip">${a.ip}</span>`:''}
+                    <span style="font-size:11px;color:${ACTION_COLOR[a.action]||'#94a3b8'};">● ${a.action}</span>
+                </div>
+            </div>
+            <div class="alert-actions">
+                ${!a.read?`<button class="btn btn-secondary btn-sm"
+                    onclick="event.stopPropagation();markRead(${a.id})">Mark read</button>`:''}
+                <button class="btn btn-danger btn-sm"
+                    onclick="event.stopPropagation();dismissAlert(${a.id})">Dismiss</button>
+            </div>
+        </div>
+        <div class="alert-detail" id="detail-${a.id}">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-item-label">Source IP</div>
+                    <div class="detail-item-val">${a.ip}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Country</div>
+                    <div class="detail-item-val">${a.country}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Target</div>
+                    <div class="detail-item-val">${a.target}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Port</div>
+                    <div class="detail-item-val">${a.details.port}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Protocol</div>
+                    <div class="detail-item-val">${a.details.protocol}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Duration</div>
+                    <div class="detail-item-val">${a.details.duration}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Bandwidth</div>
+                    <div class="detail-item-val">${a.details.bandwidth}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Action taken</div>
+                    <div class="detail-item-val" style="color:${ACTION_COLOR[a.action]}">${a.action}</div>
+                </div>
+            </div>
+            <div class="detail-actions">
+                <button class="btn btn-danger btn-sm" onclick="blockIP('${a.ip}')">Block IP</button>
+                <button class="btn btn-secondary btn-sm" onclick="viewLogs('${a.ip}')">View logs</button>
+                <button class="btn btn-secondary btn-sm" onclick="dismissAlert(${a.id})">Dismiss alert</button>
+            </div>
+        </div>
+    </div>
+    `).join('');
+    }
+
+    const totalPages = Math.max(1,Math.ceil(total/PER_PAGE));
+    document.getElementById('pg-info').textContent = `Showing
+    ${Math.min(start+1,total)}–${Math.min(start+PER_PAGE,total)} of ${total} alerts`;
+    document.getElementById('btn-prev').disabled = page<=1; document.getElementById('btn-next').disabled=page>
+        =totalPages;
+        updateMetrics();
+        }
+
+        /* ── INTERACTIONS ── */
+        function toggleDetail(id){
+        const a = ALERTS.find(x=>x.id===id);
+        if(a && !a.read){ a.read=true; renderFeed(); return; }
+        const det = document.getElementById('detail-'+id);
+        if(det) det.classList.toggle('open');
+        }
+
+        function markRead(id){
+        const a=ALERTS.find(x=>x.id===id);
+        if(a){ a.read=true; renderFeed(); }
+        }
+
+        function markAllRead(){
+        ALERTS.forEach(a=>a.read=true);
+        renderFeed();
+        toast('All alerts marked as read.');
+        }
+
+        function dismissAlert(id){
+        ALERTS=ALERTS.filter(a=>a.id!==id);
+        renderFeed();
+        toast('Alert dismissed.');
+        }
+
+        function clearAll(){
+        if(!confirm('Clear all alerts? This cannot be undone.')) return;
+        ALERTS=[];
+        renderFeed();
+        toast('All alerts cleared.');
+        }
+
+        function filterBySev(sev, el, special){
+        document.querySelectorAll('.metric').forEach(m=>m.classList.remove('selected'));
+        el.classList.add('selected');
+        activeFilter = sev;
+        if(special==='unread'){
+        document.getElementById('f-status').value='unread';
+        activeFilter='';
+        } else {
+        document.getElementById('f-status').value='';
+        }
+        page=1;
+        renderFeed();
+        }
+
+        function changePage(d){
+        const max=Math.max(1,Math.ceil(getFiltered().length/PER_PAGE));
+        page=Math.min(max,Math.max(1,page+d));
+        renderFeed();
+        }
+
+        function blockIP(ip){
+        if(ip==='—') return;
+        toast(`IP ${ip} added to block list.`);
+        }
+
+        function viewLogs(ip){
+        toast(`Viewing attack logs for ${ip}...`);
+        setTimeout(()=>{ window.location.href='/attacklogs'; }, 900);
+        }
+
+        /* ── SIMULATE ALERT ── */
+        const SIM_ALERTS = [
+        {sev:"Critical",type:"SQLi", title:"Live SQLi attempt detected", desc:"New IP injecting UNION SELECT payload on
+        /api/data. WAF intercept active.", ip:"203.0.113.45", country:"🇨🇳
+        CN",details:{port:"443",protocol:"HTTPS",duration:"0m 01s",bandwidth:"0.2 Gbps"}},
+        {sev:"High", type:"Brute Force",title:"Brute force on /admin panel", desc:"550 failed login attempts from new IP
+        in under 2 minutes. Auto-block pending.",ip:"198.51.100.22",country:"🇷🇺
+        RU",details:{port:"80",protocol:"HTTP",duration:"1m 55s",bandwidth:"0.5 Gbps"}},
+        {sev:"Critical",type:"DDoS", title:"New DDoS wave incoming", desc:"Traffic spike from 5 coordinated IPs — 180k
+        req/s combined. Edge mitigation triggered.",ip:"198.51.100.7",country:"🇮🇷
+        IR",details:{port:"80",protocol:"TCP",duration:"ongoing",bandwidth:"14 Gbps"}},
+        {sev:"Medium", type:"XSS", title:"XSS in /comment endpoint", desc:"Script tag injection detected in comment body
+        field. Input escaped, no execution.",ip:"203.0.113.9",country:"🇩🇪
+        DE",details:{port:"443",protocol:"HTTPS",duration:"0m 01s",bandwidth:"0.1 Gbps"}},
+        {sev:"High", type:"RCE", title:"Shell upload attempt", desc:"PHP webshell upload blocked on /upload. File
+        extension whitelist enforced.", ip:"192.0.2.100", country:"🇺🇦
+        UA",details:{port:"443",protocol:"HTTPS",duration:"0m 03s",bandwidth:"0.3 Gbps"}},
+        ];
+        let simIdx=0;
+
+        function simulateAlert(){
+        const tmpl = SIM_ALERTS[simIdx % SIM_ALERTS.length];
+        simIdx++;
+        const now = new Date();
+        const time = now.toTimeString().slice(0,8);
+        const newAlert = {
+        id: Date.now(),
+        ...tmpl,
+        time,
+        target: '/simulated',
+        action: 'Alerted',
+        read: false
+        };
+        ALERTS.unshift(newAlert);
+        page=1;
+        renderFeed();
+        toast(`New ${tmpl.sev} alert simulated.`);
+        }
+
+        /* ── SOUND ── */
+        function toggleSound(){
+        soundOn=!soundOn;
+        const btn=document.getElementById('sound-btn');
+        btn.textContent = soundOn ? '🔔 Sound on' : '🔕 Sound off';
+        btn.classList.toggle('on', soundOn);
+        toast(soundOn ? 'Alert sound enabled.' : 'Alert sound disabled.');
+        }
+
+        /* ── TOAST ── */
+        function toast(msg){
+        const t=document.getElementById('toast');
+        t.textContent=msg;
+        t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'),2600);
+        }
+
+        /* ── INIT ── */
+        renderFeed();
+        </script>
+</body>
+
+</html>

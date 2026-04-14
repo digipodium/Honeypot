@@ -1,174 +1,836 @@
-{% extends 'base.html' %}
-
-{% block css %}
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HoneyTrap — Access Control</title>
+<link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bg:      #0f0f23;
+    --bg2:     #1a1a2e;
+    --panel:   rgba(0, 0, 0, 0.7);
+    --border:  rgba(255, 255, 255, 0.2);
+    --accent:  #00d4aa;
+    --accent2: #ff3b3b;
+    --text:    rgba(255, 255, 255, 0.9);
+    --text-dim: rgba(255, 255, 255, 0.5);
+    --glow:    0 0 10px rgba(0, 212, 170, 0.5);
+    --glow-lg: 0 0 30px rgba(0, 212, 170, 0.3);
+    --input-bg: rgba(255,255,255,0.04);
+  }
 
-@import url("https://fonts.googleapis.com/css?family=Fira+Sans");
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-    height: 100vh;
+  body {
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+    color: var(--text);
+    font-family: "Inter", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* Matrix canvas */
+  #matrix {
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.3;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 64px;
+    background: rgba(15, 15, 35, 0.85);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-shadow: var(--glow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .nav-logo::before { content: '◈'; animation: pulse 2s infinite; }
+  .nav-badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 5px 12px;
+    border-radius: 20px;
+    letter-spacing: 2px;
+    animation: blink 3s infinite;
+    box-shadow: var(--glow);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .auth-wrapper {
+    position: relative;
+    z-index: 1;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: "Fira Sans", sans-serif;
-}
+    min-height: 100vh;
+    padding: 100px 24px 40px;
+  }
 
-/* container */
+  /* Decorative circles like hero */
+  .bg-circle {
+    position: fixed;
+    top: 50%; right: -8%;
+    transform: translateY(-50%);
+    width: 550px; height: 550px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,212,170,0.12);
+    box-shadow: 0 0 120px rgba(0,212,170,0.04), inset 0 0 120px rgba(0,212,170,0.03);
+    pointer-events: none;
+    animation: rotate-slow 30s linear infinite;
+    z-index: 0;
+  }
+  .bg-circle::before {
+    content: '';
+    position: absolute;
+    inset: 50px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,212,170,0.07);
+    animation: rotate-slow 20s linear infinite reverse;
+  }
+  .bg-circle-left {
+    position: fixed;
+    top: 20%; left: -12%;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,212,170,0.07);
+    pointer-events: none;
+    animation: rotate-slow 40s linear infinite reverse;
+    z-index: 0;
+  }
 
-.form-structor {
-    background-image: url('https://vida.id/hubfs/Perbedaan%20Hacker%20dan%20Cracker.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-    border-radius: 15px;
-    height: 550px;
-    width: 350px;
+  /* ── CARD ── */
+  .auth-card {
+    width: 100%;
+    max-width: 460px;
+    background: rgba(0, 0, 0, 0.72);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 24px;
+    padding: 48px 44px 40px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,212,170,0.05);
+    position: relative;
+    animation: fadeUp 0.6s ease forwards;
+  }
+  .auth-card::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 32px;
+    width: 80px; height: 3px;
+    background: linear-gradient(90deg, #00d4aa, #007f73);
+    border-radius: 0 0 4px 4px;
+    box-shadow: var(--glow);
+  }
+
+  /* Card header */
+  .card-header { margin-bottom: 36px; }
+  .card-tag {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: rgba(0,212,170,0.7);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-tag::before {
+    content: '';
+    display: block;
+    width: 18px; height: 1.5px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .card-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .card-title span { color: var(--accent); text-shadow: var(--glow); }
+  .card-sub {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* ── TABS ── */
+  .tab-bar {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 32px;
+    background: rgba(255,255,255,0.03);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 11px 0;
+    background: transparent;
+    border: none;
+    font-family: "Inter", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .tab-btn.active {
+    background: rgba(0,212,170,0.12);
+    color: var(--accent);
+    box-shadow: inset 0 0 12px rgba(0,212,170,0.08);
+  }
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 20%; right: 20%;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px 2px 0 0;
+    box-shadow: var(--glow);
+  }
+  .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.04); }
+
+  /* ── FORMS ── */
+  .form-panel { display: none; }
+  .form-panel.active { display: block; animation: fadeUp 0.4s ease; }
+
+  .field-group { margin-bottom: 20px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+  label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(0,212,170,0.8);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 9px;
+  }
+
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-icon {
+    position: absolute;
+    left: 14px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    pointer-events: none;
+    transition: color 0.3s;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 13px 14px 13px 40px;
+    background: var(--input-bg);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: "Inter", sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.3s ease;
+    letter-spacing: 0.3px;
+  }
+  input::placeholder { color: rgba(255,255,255,0.22); }
+  input:focus {
+    border-color: rgba(0,212,170,0.6);
+    background: rgba(0,212,170,0.05);
+    box-shadow: 0 0 0 3px rgba(0,212,170,0.08);
+  }
+  input:focus + .input-icon,
+  .input-wrap:focus-within .input-icon { color: var(--accent); }
+
+  /* Password toggle */
+  .pw-toggle {
+    position: absolute;
+    right: 14px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-family: "Inter", sans-serif;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+    padding: 0;
+  }
+  .pw-toggle:hover { color: var(--accent); }
+
+  /* Strength bar */
+  .strength-bar {
+    margin-top: 8px;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 4px;
+    transition: all 0.4s ease;
+    background: var(--accent2);
+  }
+  .strength-label {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-top: 5px;
+  }
+
+  /* Checkbox */
+  .check-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 28px;
+    cursor: pointer;
+  }
+  .check-wrap input[type="checkbox"] {
+    appearance: none;
+    width: 16px; height: 16px;
+    min-width: 16px;
+    background: var(--input-bg);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+    margin-top: 2px;
+    transition: all 0.2s;
+  }
+  .check-wrap input[type="checkbox"]:checked {
+    background: rgba(0,212,170,0.2);
+    border-color: var(--accent);
+  }
+  .check-wrap input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 14px;
+    text-align: center;
+  }
+  .check-label {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .check-label a { color: var(--accent); text-decoration: none; }
+  .check-label a:hover { text-decoration: underline; }
+
+  /* Options row */
+  .options-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .forgot-link {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+  }
+  .forgot-link:hover { color: var(--accent); }
+
+  /* ── SUBMIT BUTTON ── */
+  .btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #00d4aa 0%, #007f73 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: "Inter", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-}
-
-/* SIGNUP */
-
-.signup {
+    box-shadow: 0 4px 20px rgba(0,212,170,0.25);
+    margin-bottom: 24px;
+  }
+  .btn-submit::before {
+    content: '';
     position: absolute;
-    top: 5%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 65%;
-    z-index: 5;
-    transition: .3s;
-}
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    transition: left 0.5s ease;
+  }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,212,170,0.4); }
+  .btn-submit:hover::before { left: 100%; }
+  .btn-submit:active { transform: translateY(0); }
 
-.signup.slide-up {
-    top: 85%;
-}
+  /* ── DIVIDER ── */
+  .or-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .or-divider::before, .or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+  }
+  .or-divider span {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
 
-.signup .form-title {
-    color: rgb(10, 86, 52);
-    font-size: 1.7em;
-    text-align: center;
+  /* ── SOCIAL BUTTONS ── */
+  .social-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+  .btn-social {
+    padding: 11px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: var(--text-dim);
+    font-family: "Inter", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 1px;
     cursor: pointer;
-}
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-social:hover { border-color: rgba(0,212,170,0.4); color: var(--accent); background: rgba(0,212,170,0.05); }
+  .btn-social svg { width: 14px; height: 14px; }
 
-.signup .form-holder {
-    border-radius: 15px;
-    margin-top: 30px;
-    overflow: hidden;
-}
+  /* ── TERMINAL STATUS (card bottom) ── */
+  .card-terminal {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 0.72rem;
+    line-height: 1.9;
+    color: var(--text-dim);
+    font-family: monospace;
+  }
+  .card-terminal .t-ok { color: var(--accent); }
+  .card-terminal .t-warn { color: #ffa500; }
 
-.input {
-    border: none;
-    width: 100%;
-    padding: 12px;
-    border-bottom: 1px solid #eee;
-}
+  /* ── ALERT MESSAGES ── */
+  .alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    margin-bottom: 20px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    animation: fadeUp 0.3s ease;
+  }
+  .alert.show { display: flex; }
+  .alert-error { background: rgba(255,59,59,0.1); border: 1px solid rgba(255,59,59,0.3); color: #ff6b6b; }
+  .alert-success { background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.3); color: var(--accent); }
 
-.submit-btn {
-    width: 100%;
-    margin-top: 15px;
-    padding: 12px;
-    border: none;
-    border-radius: 15px;
-    background: #444;
-    color: white;
-    cursor: pointer;
-}
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 20px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+  }
+  .footer-logo {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-shadow: var(--glow);
+  }
+  .footer-info { font-size: 0.62rem; color: var(--text-dim); letter-spacing: 1px; }
+  .footer-status {
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: var(--glow); animation: pulse 2s infinite; }
 
-/* LOGIN */
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  @keyframes rotate-slow { from { transform: translateY(-50%) rotate(0deg); } to { transform: translateY(-50%) rotate(360deg); } }
 
-.login {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 80%;
-    border-radius: 50% 50% 0 0;
-    transition: .3s;
-}
-
-.login.slide-up {
-    height: 20%;
-}
-
-.center {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 65%;
-}
-
-.login .form-title {
-    text-align: center;
-    font-size: 1.7em;
-    cursor: pointer;
-    color: seagreen;
-}
-
-.login .form-holder {
-    margin-top: 30px;
-}
-
+  /* ── RESPONSIVE ── */
+  @media (max-width: 520px) {
+    nav { padding: 0 20px; }
+    .auth-card { padding: 36px 24px 28px; }
+    .field-row { grid-template-columns: 1fr; gap: 0; }
+    footer { padding: 16px 20px; flex-direction: column; gap: 10px; text-align: center; }
+    .social-btns { grid-template-columns: 1fr; }
+  }
 </style>
+</head>
+<body>
 
-{% endblock %}
+<canvas id="matrix"></canvas>
+<div class="bg-circle"></div>
+<div class="bg-circle-left"></div>
 
-{% block content %}
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">HONEYPOT</a>
+  <div class="nav-badge">◉ SECURE ACCESS</div>
+</nav>
 
-<div class="form-structor" >
-<form action="/login" method="POST">
+<!-- MAIN -->
+<main class="auth-wrapper">
+  <div class="auth-card">
 
-    <div class="signup slide-up">
-        <h2 class="form-title" id="signup">Sign up</h2>
-        
-        <div class="form-holder">
-            <input type="text" class="input" placeholder="Name">
-            <input type="email" class="input" placeholder="Email">
-            <input type="password" class="input" placeholder="Password">
-        </div>
-        
-        <button class="submit-btn">Sign up</button>
-    </div>
-</form>
-    
-<form action="/register" method="POST">
-<div class="login">
-        <div class="center">
-            
-            <h2 class="form-title" id="login">Log in</h2>
-            
-            <div class="form-holder">
-                <input type="email" class="input" placeholder="Email">
-                <input type="password" class="input" placeholder="Password">
-            </div>
-
-            <button class="submit-btn">Log in</button>
-
-        </div>
+    <!-- Header -->
+    <div class="card-header">
+      <div class="card-tag">// Access Control System</div>
+      <h1 class="card-title">System <span>Auth</span></h1>
+      <p class="card-sub">Authorized personnel only. All access attempts are logged and monitored.</p>
     </div>
 
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <button class="tab-btn {% if active_tab != 'register' %}active{% endif %}" onclick="switchTab('login')">⬡ Login</button>
+      <button class="tab-btn {% if active_tab == 'register' %}active{% endif %}" onclick="switchTab('register')">⊕ Register</button>
+    </div>
+
+    <!-- Alert -->
+    <div class="alert alert-error" id="alertError">
+      <span>⚠</span><span id="alertErrorMsg">Invalid credentials. Access denied.</span>
+    </div>
+    <div class="alert alert-success" id="alertSuccess">
+      <span>✓</span><span id="alertSuccessMsg">Access granted. Redirecting...</span>
+    </div>
+
+    <!-- ══ LOGIN FORM ══ -->
+    <div class="form-panel {% if active_tab != 'register' %}active{% endif %}" id="loginPanel">
+      <div class="field-group">
+        <label>Identifier</label>
+        <div class="input-wrap">
+          <input type="text" placeholder="Username or email" id="loginUser" autocomplete="username">
+          <span class="input-icon">◈</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Access Key</label>
+        <div class="input-wrap">
+          <input type="password" placeholder="Enter password" id="loginPass" autocomplete="current-password">
+          <span class="input-icon">⧖</span>
+          <button type="button" class="pw-toggle" onclick="togglePw('loginPass', this)">SHOW</button>
+        </div>
+      </div>
+
+      <div class="options-row">
+        <label class="check-wrap" style="margin-bottom:0;">
+          <input type="checkbox" id="rememberMe">
+          <span class="check-label">Keep me logged in</span>
+        </label>
+        <a href="#" class="forgot-link">Forgot access key?</a>
+      </div>
+
+      <form action="/login" method="POST">
+  <input type="hidden" name="email" id="hiddenEmail">
+  <input type="hidden" name="password" id="hiddenPassword">
+  <button type="submit" class="btn-submit" onclick="return submitLogin()">
+    ⬡ &nbsp; Authenticate
+  </button>
 </form>
-</div>
 
-{% endblock %}
+      <div class="or-divider"><span>or continue with</span></div>
 
-{% block js %}
+      <div class="social-btns">
+        <button class="btn-social" onclick="socialLogin('GitHub')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.37.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.13 3 .4 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.22.7.83.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </button>
+        <button class="btn-social" onclick="socialLogin('Google')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Google
+        </button>
+      </div>
+
+      <!-- Terminal status -->
+      <div class="card-terminal">
+        <div><span class="t-ok">✓</span> TLS 1.3 encrypted connection</div>
+        <div><span class="t-ok">✓</span> 2FA available in settings</div>
+        <div><span class="t-warn">⚠</span> Session expires after 30min idle</div>
+      </div>
+    </div>
+
+    ══ REGISTER FORM ══
+    <div class="form-panel {% if active_tab == 'register' %}active{% endif %}" id="registerPanel">
+      <div class="field-row">
+        <div class="field-group" style="margin-bottom:0">
+          <label>First Name</label>
+          <div class="input-wrap">
+            <input type="text" placeholder="Arpita" id="regFirst">
+            <span class="input-icon">◈</span>
+          </div>
+        </div>
+        <div class="field-group" style="margin-bottom:0">
+          <label>Last Name</label>
+          <div class="input-wrap">
+            <input type="text" placeholder="Singh" id="regLast">
+            <span class="input-icon">◈</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Email Address</label>
+        <div class="input-wrap">
+          <input type="email" placeholder="user@domain.com" id="regEmail">
+          <span class="input-icon">⊕</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Username</label>
+        <div class="input-wrap">
+          <input type="text" placeholder="Choose a handle" id="regUser">
+          <span class="input-icon">⧖</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Access Key</label>
+        <div class="input-wrap">
+          <input type="password" placeholder="Create password" id="regPass" oninput="checkStrength(this.value)" autocomplete="new-password">
+          <span class="input-icon">▣</span>
+          <button type="button" class="pw-toggle" onclick="togglePw('regPass', this)">SHOW</button>
+        </div>
+        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+        <div class="strength-label" id="strengthLabel">Strength: —</div>
+      </div>
+
+      <div class="field-group">
+        <label>Confirm Key</label>
+        <div class="input-wrap">
+          <input type="password" placeholder="Repeat password" id="regPassConf" autocomplete="new-password">
+          <span class="input-icon">▣</span>
+          <button type="button" class="pw-toggle" onclick="togglePw('regPassConf', this)">SHOW</button>
+        </div>
+      </div>
+
+      <label class="check-wrap">
+        <input type="checkbox" id="agreeTerms">
+        <span class="check-label">I agree to the <a href="#">Terms of Service</a> and acknowledge that all activity is monitored and logged by the Honeypot IDS.</span>
+      </label>
+
+      <form action="/register" method="POST">
+  <input type="hidden" name="name" id="hiddenName">
+  <input type="hidden" name="email" id="hiddenRegEmail">
+  <input type="hidden" name="password" id="hiddenPass">
+  <input type="hidden" name="confirm_password" id="hiddenConf">
+  <button type="submit" class="btn-submit" onclick="return submitRegister()">
+    ⊕ &nbsp; Create Account
+  </button>
+</form>
+
+      <div class="card-terminal">
+        <div><span class="t-ok">✓</span> Passwords hashed with bcrypt</div>
+        <div><span class="t-ok">✓</span> All registrations logged for review</div>
+        <div><span class="t-warn">⚠</span> Admin approval may be required</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="footer-logo">◈ HONEYPOT IDS</div>
+  <div class="footer-info">School of Computer Applications · Intrusion Detection System</div>
+  <div class="footer-status"><div class="status-dot"></div>SYSTEM ONLINE</div>
+</footer>
 
 <script>
+  const initialTab = {{ active_tab|default('login')|tojson }};
 
-const loginBtn = document.getElementById("login");
-const signupBtn = document.getElementById("signup");
+  /* ── Matrix Rain ── */
+  const canvas = document.getElementById("matrix");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const fontSize = 16;
+  const columns = Math.floor(canvas.width / fontSize);
+  const drops = Array(columns).fill(1);
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(15, 15, 35, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#00d4aa";
+    ctx.font = fontSize + "px monospace";
+    drops.forEach((y, i) => {
+      const text = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(text, i * fontSize, y * fontSize);
+      if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    });
+  }
+  setInterval(drawMatrix, 80);
+  window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
 
-loginBtn.onclick = () => {
-    document.querySelector(".login").classList.remove("slide-up");
-    document.querySelector(".signup").classList.add("slide-up");
-};
+  /* ── Tab switcher ── */
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+    });
+    document.getElementById('loginPanel').classList.toggle('active', tab === 'login');
+    document.getElementById('registerPanel').classList.toggle('active', tab === 'register');
+    hideAlerts();
+  }
 
-signupBtn.onclick = () => {
-    document.querySelector(".signup").classList.remove("slide-up");
-    document.querySelector(".login").classList.add("slide-up");
-};
+  /* ── Password toggle ── */
+  function togglePw(id, btn) {
+    const inp = document.getElementById(id);
+    const isText = inp.type === 'text';
+    inp.type = isText ? 'password' : 'text';
+    btn.textContent = isText ? 'SHOW' : 'HIDE';
+  }
 
+  /* ── Password strength ── */
+  function checkStrength(val) {
+    const fill = document.getElementById('strengthFill');
+    const label = document.getElementById('strengthLabel');
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const colors = ['#ff3b3b', '#ff8c00', '#ffd700', '#00d4aa'];
+    const labels = ['WEAK', 'FAIR', 'GOOD', 'STRONG'];
+    fill.style.width = (score * 25) + '%';
+    fill.style.background = colors[score - 1] || '#ff3b3b';
+    label.textContent = val.length ? 'Strength: ' + (labels[score - 1] || 'WEAK') : 'Strength: —';
+    label.style.color = score >= 3 ? 'var(--accent)' : 'rgba(255,255,255,0.4)';
+  }
+
+  /* ── Alerts ── */
+  function showAlert(type, msg) {
+    hideAlerts();
+    const el = document.getElementById(type === 'error' ? 'alertError' : 'alertSuccess');
+    const msgEl = document.getElementById(type === 'error' ? 'alertErrorMsg' : 'alertSuccessMsg');
+    msgEl.textContent = msg;
+    el.classList.add('show');
+  }
+  function hideAlerts() {
+    document.getElementById('alertError').classList.remove('show');
+    document.getElementById('alertSuccess').classList.remove('show');
+  }
+
+  switchTab(initialTab);
+
+  /* ── Login handler ── */
+  function submitLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+
+  if (!user || !pass) {
+    showAlert('error', 'All fields are required. Access denied.');
+    return false; // form submit rokta hai
+  }
+
+  // Hidden fields mein value daalo
+  document.getElementById('hiddenEmail').value = user;
+  document.getElementById('hiddenPassword').value = pass;
+  return true; //* Wire up your Flask /login endpoint here */
+  }
+
+  /* ── Register handler ── */
+  function submitRegister() {
+  const first = document.getElementById('regFirst').value.trim();
+  const last  = document.getElementById('regLast').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass  = document.getElementById('regPass').value;
+  const conf  = document.getElementById('regPassConf').value;
+  const terms = document.getElementById('agreeTerms').checked;
+
+  if (!first || !last || !email || !pass) {
+    showAlert('error', 'All fields are required.'); return false;
+  }
+  if (pass !== conf) {
+    showAlert('error', 'Passwords do not match.'); return false;
+  }
+  if (pass.length < 8) {
+    showAlert('error', 'Password must be at least 8 characters.'); return false;
+  }
+  if (!terms) {
+    showAlert('error', 'You must accept the terms.'); return false;
+  }
+
+  document.getElementById('hiddenName').value = `${first} ${last}`.trim();
+  document.getElementById('hiddenRegEmail').value = email;
+  document.getElementById('hiddenPass').value = pass;
+  document.getElementById('hiddenConf').value = conf;
+  return true;
+  }
+
+  /* ── Social login placeholder ── */
+  function socialLogin(provider) {
+    showAlert('success', provider + ' OAuth flow initiated...');
+  }
 </script>
-
-{% endblock %}
+</body>
+</html>

