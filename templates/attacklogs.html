@@ -344,28 +344,7 @@
   </div>
 
 <script>
-  const LOGS = [
-    {id:1,  ts:"2026-04-14 09:01:32", ip:"185.220.101.47",  target:"/login",        type:"Brute",  sev:"High",     status:"Blocked", country:"RU", payload:"POST /login x520 attempts"},
-    {id:2,  ts:"2026-04-14 09:03:14", ip:"45.142.212.18",   target:"/api/users",    type:"SQLi",   sev:"Critical", status:"Blocked", country:"CN", payload:"' OR 1=1--"},
-    {id:3,  ts:"2026-04-14 09:05:47", ip:"91.108.4.100",    target:"/search",       type:"XSS",    sev:"Medium",   status:"Alerted", country:"DE", payload:"<script>alert(1)<\/script>"},
-    {id:4,  ts:"2026-04-14 09:07:03", ip:"194.165.16.11",   target:"/",             type:"DDoS",   sev:"Critical", status:"Blocked", country:"IR", payload:"SYN flood 92k req/s"},
-    {id:5,  ts:"2026-04-14 09:10:22", ip:"104.248.232.55",  target:"/admin",        type:"Recon",  sev:"Low",      status:"Alerted", country:"US", payload:"Nmap scan 0-65535"},
-    {id:6,  ts:"2026-04-14 09:13:58", ip:"77.83.247.7",     target:"/upload",       type:"RCE",    sev:"Critical", status:"Blocked", country:"UA", payload:"cmd.php shell upload"},
-    {id:7,  ts:"2026-04-14 09:15:30", ip:"185.220.102.8",   target:"/login",        type:"Brute",  sev:"High",     status:"Blocked", country:"NL", payload:"POST /login x310 attempts"},
-    {id:8,  ts:"2026-04-14 09:17:04", ip:"62.210.115.8",    target:"/api/orders",   type:"SQLi",   sev:"High",     status:"Blocked", country:"FR", payload:"UNION SELECT * FROM users"},
-    {id:9,  ts:"2026-04-14 09:19:45", ip:"5.188.206.14",    target:"/comment",      type:"XSS",    sev:"Medium",   status:"Passed",  country:"RU", payload:"<img src=x onerror=alert(1)>"},
-    {id:10, ts:"2026-04-14 09:21:11", ip:"103.253.145.5",   target:"/checkout",     type:"SQLi",   sev:"Critical", status:"Blocked", country:"IN", payload:"'; DROP TABLE orders--"},
-    {id:11, ts:"2026-04-14 09:23:00", ip:"45.14.48.200",    target:"/",             type:"DDoS",   sev:"High",     status:"Alerted", country:"BR", payload:"UDP flood 40k req/s"},
-    {id:12, ts:"2026-04-14 09:25:37", ip:"79.137.192.9",    target:"/admin/config", type:"RCE",    sev:"Critical", status:"Blocked", country:"PL", payload:"../../etc/passwd"},
-    {id:13, ts:"2026-04-14 09:27:59", ip:"185.220.101.33",  target:"/wp-admin",     type:"Brute",  sev:"Medium",   status:"Blocked", country:"RU", payload:"POST wp-login x200"},
-    {id:14, ts:"2026-04-14 09:29:14", ip:"92.118.35.8",     target:"/",             type:"Recon",  sev:"Low",      status:"Passed",  country:"TR", payload:"Shodan crawler"},
-    {id:15, ts:"2026-04-14 09:31:42", ip:"144.76.45.22",    target:"/api/data",     type:"XSS",    sev:"High",     status:"Alerted", country:"DE", payload:"javascript:alert(document.cookie)"},
-    {id:16, ts:"2026-04-14 09:34:05", ip:"212.119.34.100",  target:"/login",        type:"SQLi",   sev:"Critical", status:"Blocked", country:"RO", payload:"admin'--"},
-    {id:17, ts:"2026-04-14 09:36:27", ip:"31.13.90.44",     target:"/",             type:"DDoS",   sev:"Critical", status:"Blocked", country:"CN", payload:"HTTP flood 210k req/s"},
-    {id:18, ts:"2026-04-14 09:38:50", ip:"5.34.180.195",    target:"/shell.php",    type:"RCE",    sev:"Critical", status:"Blocked", country:"AZ", payload:"wget malware.sh | bash"},
-    {id:19, ts:"2026-04-14 09:41:09", ip:"83.97.20.86",     target:"/profile",      type:"XSS",    sev:"Low",      status:"Passed",  country:"IT", payload:"<b onmouseover=alert(1)>"},
-    {id:20, ts:"2026-04-14 09:43:31", ip:"104.156.155.11",  target:"/reset",        type:"Brute",  sev:"Medium",   status:"Alerted", country:"US", payload:"Token enumeration x90"},
-  ];
+  let LOGS = [];
 
   const SEV_ORDER = {Critical:0, High:1, Medium:2, Low:3};
   let page = 1;
@@ -474,7 +453,18 @@
     a.click();
   }
 
-  draw();
+  async function loadLogs() {
+    try {
+      const response = await fetch('/api/logs');
+      const data = await response.json();
+      LOGS = Array.isArray(data) ? data : [];
+    } catch (error) {
+      LOGS = [];
+    }
+    draw();
+  }
+
+  loadLogs();
 </script>
 </body>
 </html>

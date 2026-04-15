@@ -562,6 +562,18 @@
     <div class="alert alert-success" id="alertSuccess">
       <span>✓</span><span id="alertSuccessMsg">Access granted. Redirecting...</span>
     </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% set category, message = messages[-1] %}
+        <div
+          class="alert {% if category == 'error' %}alert-error{% else %}alert-success{% endif %} show"
+          id="serverAlert"
+        >
+          <span>{% if category == 'error' %}⚠{% else %}✓{% endif %}</span>
+          <span>{{ message }}</span>
+        </div>
+      {% endif %}
+    {% endwith %}
 
     <!-- ══ LOGIN FORM ══ -->
     <div class="form-panel {% if active_tab != 'register' %}active{% endif %}" id="loginPanel">
