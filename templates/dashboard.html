@@ -103,6 +103,22 @@
   }
   .topbar-title { font-size:0.75rem; font-weight:600; color:var(--text-dim); letter-spacing:2px; text-transform:uppercase; }
   .topbar-right { display:flex; align-items:center; gap:20px; }
+  .topbar-logout {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border: 1px solid var(--border);
+    padding: 7px 12px;
+    border-radius: 999px;
+    transition: all 0.2s;
+  }
+  .topbar-logout:hover {
+    color: var(--accent2);
+    border-color: rgba(255,59,59,0.35);
+    background: rgba(255,59,59,0.08);
+  }
   .live-badge {
     display:flex; align-items:center; gap:7px; font-size:0.65rem; font-weight:600;
     color:var(--accent); letter-spacing:2px; border:1px solid rgba(0,212,170,0.4);
@@ -132,7 +148,7 @@
   .flash-bar.error { background:rgba(255,59,59,0.1); border-color:rgba(255,59,59,0.3); color:#ff6b6b; }
 
   /* ── STAT CARDS ── */
-  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:32px; }
+  .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:32px; }
   .stat-card {
     background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:24px;
     position:relative; overflow:hidden; transition:all 0.3s; backdrop-filter:blur(8px);
@@ -290,6 +306,7 @@
     <div class="topbar-right">
       <div class="live-badge"><div class="live-dot"></div>LIVE</div>
       <div class="topbar-time" id="clock">--:--:--</div>
+      <a href="/logout" class="topbar-logout">Logout</a>
     </div>
   </div>
 
@@ -340,11 +357,6 @@
         <div class="stat-top"><span class="stat-label">Paths Probed</span><span class="stat-icon">◎</span></div>
         <div class="stat-num" id="pathsProbed">0</div>
         <div class="stat-trend">Unique endpoints hit</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-top"><span class="stat-label">Dummy Responses</span><span class="stat-icon">▣</span></div>
-        <div class="stat-num" id="dummyCount">0</div>
-        <div class="stat-trend"><span class="down">✓ 100%</span> deceived</div>
       </div>
     </div>
 
@@ -403,7 +415,6 @@
           <div><span class="t-green">✓</span> Honeypot services: <span class="t-white">RUNNING</span></div>
           <div><span class="t-green">✓</span> Intrusion logging: <span class="t-white">ACTIVE</span></div>
           <div><span class="t-green">✓</span> Database: <span class="t-white">CONNECTED</span></div>
-          <div><span class="t-green">✓</span> Dummy responses: <span class="t-white">ENABLED</span></div>
           <div><span class="t-amber">⚠</span> Delay range: <span class="t-white">0.3s – 1.2s</span></div>
           <div><span class="t-red">●</span> High-threat IPs: <span class="t-white" id="highThreatCount">0</span></div>
           <div><span class="t-green">✓</span> Session user: <span class="t-white" id="termUser">Admin</span></div>
@@ -526,7 +537,7 @@ function renderActivity(logs){
           <b>${l.ip}</b> probed <span class="${dot==='red'?'red':''}">${l.path}</span>
           — <span style="color:var(--text-dim)">${threat} threat</span>
         </div>
-        <div class="activity-meta">${timeStr} · ${l.method} · dummy response served</div>
+        <div class="activity-meta">${timeStr} · ${l.method} · request captured</div>
       </div>
     </div>`;
   }).join('');
@@ -543,7 +554,6 @@ async function refreshLogs(){
     animateCount("totalAttacks",data.length);
     animateCount("uniqueIPs",new Set(data.map(l=>l.ip)).size);
     animateCount("pathsProbed",new Set(data.map(l=>l.path)).size);
-    animateCount("dummyCount",data.length);
     const high=data.filter(l=>getThreat(l.path)==='HIGH').length;
     document.getElementById("highThreatCount").textContent=high;
     document.getElementById("logCount").textContent=data.length;
@@ -563,7 +573,6 @@ async function refreshLogs(){
     animateCount("totalAttacks",demo.length);
     animateCount("uniqueIPs",3);
     animateCount("pathsProbed",new Set(demo.map(l=>l.path)).size);
-    animateCount("dummyCount",demo.length);
     document.getElementById("highThreatCount").textContent=5;
     document.getElementById("logCount").textContent=demo.length;
   }

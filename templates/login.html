@@ -599,7 +599,7 @@
           <input type="checkbox" id="rememberMe">
           <span class="check-label">Keep me logged in</span>
         </label>
-        <a href="#" class="forgot-link">Forgot access key?</a>
+        <a href="{{ url_for('forgot_password') }}" class="forgot-link">Forgot access key?</a>
       </div>
 
       <form action="/login" method="POST">

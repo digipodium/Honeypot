@@ -9,6 +9,7 @@ import time
 from flask import (
     Flask,
     flash,
+    g,
     jsonify,
     make_response,
     redirect,
@@ -19,6 +20,7 @@ from flask import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from sqlalchemy import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -68,6 +70,31 @@ class AttackLog(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
 
+class AlertState(db.Model):
+    __tablename__ = "alert_states"
+
+    attack_log_id = db.Column(db.Integer, db.ForeignKey("attack_logs.id"), primary_key=True)
+    is_read = db.Column(db.Boolean, nullable=False, default=False)
+    is_dismissed = db.Column(db.Boolean, nullable=False, default=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
+class AuditLog(db.Model):
+    __tablename__ = "audit_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_name = db.Column(db.String(120), nullable=False, default="system", index=True)
+    ip = db.Column(db.String(50), nullable=False, default="unknown", index=True)
+    method = db.Column(db.String(10), nullable=False, default="GET")
+    path = db.Column(db.String(255), nullable=False, default="/")
+    action = db.Column(db.String(120), nullable=False, index=True)
+    target = db.Column(db.String(255), nullable=False, default="system")
+    status = db.Column(db.String(40), nullable=False, default="Success")
+    status_code = db.Column(db.Integer, nullable=False, default=200)
+    details = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+
 with app.app_context():
     db.create_all()
 
@@ -104,6 +131,26 @@ def login_required(route):
 
 def render_auth_page(active_tab="login"):
     return render_template("login.html", active_tab=active_tab)
+
+
+def get_reset_serializer():
+    return URLSafeTimedSerializer(app.config["SECRET_KEY"])
+
+
+def generate_reset_token(user):
+    return get_reset_serializer().dumps(user.email, salt="password-reset")
+
+
+def verify_reset_token(token, max_age=1800):
+    try:
+        email = get_reset_serializer().loads(
+            token,
+            salt="password-reset",
+            max_age=max_age,
+        )
+    except (BadSignature, SignatureExpired):
+        return None
+    return User.query.filter_by(email=email).first()
 
 
 def find_current_user(identifier):
@@ -156,7 +203,27 @@ def detect_attack_type(path, body=""):
         return "XSS"
     if any(token in data for token in ("wget ", "curl ", "cmd=", "/bin/bash", "/bin/sh", "shell.php")):
         return "RCE"
-    if any(token in data for token in ("wp-admin", "wp-login", "/login", "/admin", "/auth", "/token")):
+    if any(
+        token in data
+        for token in (
+            "wp-admin",
+            "wp-login",
+            "/login",
+            "login",
+            "signin",
+            "sign-in",
+            "/admin",
+            "/auth",
+            "/token",
+            "username=",
+            "user=",
+            "email=",
+            "password=",
+            "passwd=",
+            "pwd=",
+            "otp=",
+        )
+    ):
         return "Brute"
     if any(token in data for token in (".env", ".git", "backup", "config", "passwd", "shadow")):
         return "Recon"
@@ -310,6 +377,306 @@ def summarise_ip_logs(logs):
     return response
 
 
+def get_alert_state_map(log_ids):
+    if not log_ids:
+        return {}
+
+    states = AlertState.query.filter(AlertState.attack_log_id.in_(log_ids)).all()
+    return {state.attack_log_id: state for state in states}
+
+
+def build_alert_from_log(log, state=None):
+    event = serialise_attack_log(log)
+    severity = event["sev"]
+    attack_type = event["type"]
+    title_map = {
+        "SQLi": "SQL injection attempt detected",
+        "XSS": "Cross-site scripting probe detected",
+        "RCE": "Remote code execution probe detected",
+        "Brute": "Credential attack detected",
+        "Recon": "Reconnaissance activity detected",
+        "DDoS": "Flood activity detected",
+    }
+    description = (
+        f'{event["ip"]} targeted {event["path"]} using {event["method"]}. '
+        f'The request was classified as {severity} severity and marked {event["status"]}.'
+    )
+
+    return {
+        "id": event["id"],
+        "log_id": event["id"],
+        "sev": severity,
+        "type": attack_type,
+        "title": title_map.get(attack_type, "Suspicious activity detected"),
+        "desc": description,
+        "ip": event["ip"],
+        "country": event["country"],
+        "time": event["time"],
+        "timestamp": event["timestamp"],
+        "target": event["target"],
+        "action": event["status"],
+        "read": state.is_read if state else False,
+        "details": {
+            "method": event["method"],
+            "path": event["path"],
+            "status": event["status"],
+            "payload": event["payload"] or "No payload captured",
+            "threat": event["threat"],
+        },
+    }
+
+
+def list_live_alerts(limit=200, include_dismissed=False):
+    logs = AttackLog.query.order_by(AttackLog.timestamp.desc()).limit(limit).all()
+    states = get_alert_state_map([log.id for log in logs])
+
+    alerts = []
+    for log in logs:
+        state = states.get(log.id)
+        if state and state.is_dismissed and not include_dismissed:
+            continue
+        alerts.append(build_alert_from_log(log, state))
+    return alerts
+
+
+def severity_rank(value):
+    return {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}.get(value, 0)
+
+
+def build_analysis_payload(hours=24):
+    cutoff = datetime.utcnow().timestamp() - (hours * 3600)
+    logs = AttackLog.query.order_by(AttackLog.timestamp.desc()).all()
+    serialised = [
+        item for item in (serialise_attack_log(log) for log in logs)
+        if datetime.fromisoformat(item["timestamp"]).timestamp() >= cutoff
+    ]
+
+    total = len(serialised)
+    unique_ips = len({item["ip"] for item in serialised})
+    blocked = sum(1 for item in serialised if item["status"] == "Blocked")
+    critical = sum(1 for item in serialised if item["sev"] == "Critical")
+    block_rate = round((blocked / total) * 100, 1) if total else 0
+    risk_score = min(
+        100,
+        round(
+            (critical * 3)
+            + (sum(1 for item in serialised if item["sev"] == "High") * 2)
+            + (unique_ips * 1.5)
+        ),
+    )
+
+    hours_to_show = min(hours, 24)
+    labels = [f"{index:02d}:00" for index in range(hours_to_show)]
+    timeline_counts = {label: 0 for label in labels}
+    severity_trend = {
+        label: {"Critical": 0, "High": 0, "Medium": 0, "Low": 0}
+        for label in labels
+    }
+    weekday_labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    heatmap_rows = {
+        day: [{"hour": hour, "count": 0} for hour in range(24)]
+        for day in weekday_labels
+    }
+
+    type_counter = Counter()
+    endpoint_counter = Counter()
+    ip_counter = Counter()
+
+    for item in serialised:
+        parsed = datetime.fromisoformat(item["timestamp"])
+        hour_label = parsed.strftime("%H:00")
+        if hour_label in timeline_counts:
+            timeline_counts[hour_label] += 1
+            severity_trend[hour_label][item["sev"]] += 1
+        heatmap_rows[parsed.strftime("%a")][parsed.hour]["count"] += 1
+        type_counter[item["type"]] += 1
+        endpoint_counter[item["path"]] += 1
+        ip_counter[item["ip"]] += 1
+
+    top_ips = []
+    for ip, hits in ip_counter.most_common(8):
+        related = [item for item in serialised if item["ip"] == ip]
+        top_ips.append(
+            {
+                "ip": ip,
+                "hits": hits,
+                "type": Counter(item["type"] for item in related).most_common(1)[0][0],
+                "severity": max((item["sev"] for item in related), key=severity_rank),
+                "country": related[0]["country"],
+            }
+        )
+
+    insights = []
+    if total:
+        most_targeted_path, path_hits = endpoint_counter.most_common(1)[0]
+        top_ip, top_ip_hits = ip_counter.most_common(1)[0]
+        insights.append(
+            {
+                "level": "danger" if critical else "info",
+                "title": "Most targeted endpoint",
+                "message": f"{most_targeted_path} was probed {path_hits} times in the selected window.",
+            }
+        )
+        insights.append(
+            {
+                "level": "warning" if top_ip_hits >= 3 else "info",
+                "title": "Noisiest source IP",
+                "message": f"{top_ip} generated {top_ip_hits} captured requests.",
+            }
+        )
+        insights.append(
+            {
+                "level": "success" if block_rate >= 80 else "warning",
+                "title": "Blocking effectiveness",
+                "message": f"{block_rate}% of captured requests were blocked automatically.",
+            }
+        )
+
+    return {
+        "summary": {
+            "total_attacks": total,
+            "blocked": blocked,
+            "unique_ips": unique_ips,
+            "avg_response": "0.8s",
+            "critical_events": critical,
+            "risk_score": risk_score,
+            "risk_label": "High risk" if risk_score >= 60 else "Medium risk" if risk_score >= 30 else "Low risk",
+            "block_rate": block_rate,
+        },
+        "timeline": {
+            "labels": labels,
+            "counts": [timeline_counts[label] for label in labels],
+            "label": f"last {hours} hours",
+        },
+        "types": [{"type": name, "count": count} for name, count in type_counter.most_common()],
+        "top_ips": top_ips,
+        "countries": [{"country": country, "count": count} for country, count in Counter(item["country"] for item in serialised).most_common(8)],
+        "heatmap": [{"day": day, "hours": hours_data} for day, hours_data in heatmap_rows.items()],
+        "severity_trend": {
+            "labels": labels,
+            "series": {
+                "Critical": [severity_trend[label]["Critical"] for label in labels],
+                "High": [severity_trend[label]["High"] for label in labels],
+                "Medium": [severity_trend[label]["Medium"] for label in labels],
+                "Low": [severity_trend[label]["Low"] for label in labels],
+            },
+        },
+        "endpoints": [{"path": path, "count": count} for path, count in endpoint_counter.most_common(8)],
+        "insights": insights,
+        "recent_critical": [
+            item for item in serialised
+            if item["sev"] in {"Critical", "High"}
+        ][:6],
+    }
+
+
+def serialise_audit_log(log):
+    return {
+        "id": log.id,
+        "user": log.user_name,
+        "ip": log.ip,
+        "method": log.method,
+        "path": log.path,
+        "action": log.action,
+        "target": log.target,
+        "status": log.status,
+        "status_code": log.status_code,
+        "details": log.details or "",
+        "timestamp": log.timestamp.isoformat(),
+        "ts": log.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+
+
+def write_audit_log(action, target, status="Success", details=None, status_code=200):
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "unknown").split(",")[0].strip()
+    entry = AuditLog(
+        user_name=session.get("user_name", "system"),
+        ip=ip,
+        method=request.method,
+        path=request.path,
+        action=action,
+        target=target,
+        status=status,
+        status_code=status_code,
+        details=json.dumps(details) if isinstance(details, (dict, list)) else details,
+    )
+    db.session.add(entry)
+    db.session.commit()
+    return entry
+
+
+AUDIT_EXCLUDED_PATHS = {
+    "/honeypot-logs",
+    "/api/logs",
+    "/api/dashboard/summary",
+    "/api/ip-monitor",
+    "/api/analysis",
+    "/api/alerts",
+    "/api/audit-logs",
+}
+
+
+def resolve_audit_action(path, method):
+    if path == "/login" and method == "POST":
+        return ("Login", "session")
+    if path == "/register" and method == "POST":
+        return ("Register", "account")
+    if path == "/logout":
+        return ("Logout", "session")
+    if path == "/settings":
+        return ("Viewed Settings", "settings")
+    if path == "/reports":
+        return ("Viewed Reports", "reports")
+    if path == "/dashboard":
+        return ("Viewed Dashboard", "dashboard")
+    if path == "/attacklogs":
+        return ("Viewed Attack Logs", "attacklogs")
+    if path == "/analysis":
+        return ("Viewed Analysis", "analysis")
+    if path == "/alerts":
+        return ("Viewed Alerts", "alerts")
+    if path == "/IPmonitor":
+        return ("Viewed IP Monitor", "ip-monitor")
+    if path == "/api/alerts/mark-all-read" and method == "POST":
+        return ("Marked All Alerts Read", "alerts")
+    if path == "/api/alerts/clear" and method == "DELETE":
+        return ("Cleared Alerts", "alerts")
+    if path.startswith("/api/alerts/") and path.endswith("/read") and method == "POST":
+        return ("Marked Alert Read", path.rsplit("/", 2)[1])
+    if path.startswith("/api/alerts/") and method == "DELETE":
+        return ("Dismissed Alert", path.rsplit("/", 1)[1])
+    if path == "/api/audit-logs/cleanup" and method == "DELETE":
+        return ("Cleaned Audit Logs", "audit-logs")
+    return (None, None)
+
+
+@app.after_request
+def auto_audit_request(response):
+    try:
+        if request.endpoint == "static":
+            return response
+        if request.path.startswith("/honeypot"):
+            return response
+        if request.path in AUDIT_EXCLUDED_PATHS and request.method == "GET":
+            return response
+
+        action, target = resolve_audit_action(request.path, request.method)
+        if action is None:
+            return response
+
+        status = getattr(g, "audit_status", "Success" if response.status_code < 400 else "Failed")
+        write_audit_log(
+            action=action,
+            target=target or request.path,
+            status=status,
+            status_code=response.status_code,
+            details={"endpoint": request.path, "method": request.method},
+        )
+    except Exception:
+        db.session.rollback()
+    return response
+
+
 def get_dummy_response(path):
     probe = path.lower()
 
@@ -372,6 +739,152 @@ def log_attack(req):
             }
         )
     )
+    g.attack_logged = True
+    return entry
+
+
+MONITORED_SENSITIVE_PATHS = (
+    "/admin",
+    "/wp-login",
+    "/wp-admin",
+    "/api/auth",
+)
+
+REQUEST_LOG_EXCLUDED_PREFIXES = (
+    "/static/",
+)
+
+REQUEST_LOG_EXCLUDED_PATHS = {
+    "/favicon.ico",
+    "/honeypot-logs",
+    "/api/logs",
+    "/api/dashboard/summary",
+    "/api/ip-monitor",
+    "/api/analysis",
+    "/api/alerts",
+    "/api/audit-logs",
+}
+
+
+def build_request_capture(req):
+    body = req.get_data(as_text=True)[:500]
+    query_string = req.query_string.decode("utf-8", errors="ignore")[:300]
+    headers = {
+        key: value
+        for key, value in req.headers.items()
+        if key in {"User-Agent", "Referer", "Origin", "Content-Type", "X-Forwarded-For"}
+    }
+    ip = req.headers.get("X-Forwarded-For", req.remote_addr or "unknown").split(",")[0].strip()
+
+    return {
+        "ip": ip,
+        "method": req.method,
+        "path": req.path,
+        "body": body,
+        "query": query_string,
+        "headers": headers,
+        "user_agent": headers.get("User-Agent", ""),
+    }
+
+
+def classify_suspicious_request(capture):
+    searchable = " ".join(
+        [
+            capture.get("path", ""),
+            capture.get("query", ""),
+            capture.get("body", ""),
+            capture.get("user_agent", ""),
+        ]
+    ).lower()
+
+    matches = []
+    if any(token in searchable for token in ("drop table", "union select", " or 1=1", "select ", "admin'--", "sleep(", "benchmark(")):
+        matches.append("SQLi")
+    if any(token in searchable for token in ("<script", "javascript:", "onerror=", "onmouseover=", "alert(")):
+        matches.append("XSS")
+    if any(token in searchable for token in ("wget ", "curl ", "cmd=", "/bin/bash", "/bin/sh", "shell.php", "system(", "passthru(", "shell_exec")):
+        matches.append("RCE")
+    if any(token in searchable for token in ("wp-admin", "wp-login", "/admin", "password=", "passwd=", "username=", "otp=", "signin", "credential", "basic ")):
+        matches.append("Brute")
+    if any(token in searchable for token in (".env", ".git", "backup", "config", "passwd", "shadow", "secrets", "private_key", "/etc/passwd", "/etc/shadow")):
+        matches.append("Recon")
+    if any(token in searchable for token in ("flood", "ddos", "masscan", "nmap", "nikto", "sqlmap", "hydra", "gobuster", "wfuzz")):
+        matches.append("DDoS")
+
+    seen = set()
+    return [item for item in matches if not (item in seen or seen.add(item))]
+
+
+def should_log_suspicious_request(req, capture=None):
+    if req.method not in {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}:
+        return False
+    if any(req.path.startswith(prefix) for prefix in REQUEST_LOG_EXCLUDED_PREFIXES):
+        return False
+    if req.path in REQUEST_LOG_EXCLUDED_PATHS:
+        return False
+    if req.path.startswith("/honeypot"):
+        return False
+    if req.endpoint == "static":
+        return False
+
+    capture = capture or build_request_capture(req)
+    matches = classify_suspicious_request(capture)
+    lowered_path = req.path.lower()
+    is_sensitive_target = any(token in lowered_path for token in MONITORED_SENSITIVE_PATHS)
+    if lowered_path in {"/login", "/register", "/logout"} and not matches:
+        is_sensitive_target = False
+    return bool(matches or is_sensitive_target)
+
+
+def log_security_event(req, note=None, force=False):
+    if getattr(g, "attack_logged", False):
+        return None
+
+    capture = build_request_capture(req)
+    if not force and not should_log_suspicious_request(req, capture):
+        return None
+
+    detail_parts = []
+    if note:
+        detail_parts.append(f"event={note}")
+    if capture["query"]:
+        detail_parts.append(f"query={capture['query']}")
+    if capture["body"]:
+        detail_parts.append(f"body={capture['body']}")
+    body = " | ".join(detail_parts)[:500]
+
+    entry = AttackLog(
+        ip=capture["ip"],
+        method=capture["method"],
+        path=capture["path"],
+        body=body,
+        headers=json.dumps(capture["headers"]),
+    )
+    db.session.add(entry)
+    db.session.commit()
+
+    logging.info(
+        json.dumps(
+            {
+                "time": entry.timestamp.isoformat(),
+                "ip": entry.ip,
+                "method": entry.method,
+                "path": entry.path,
+                "body": body,
+                "headers": capture["headers"],
+                "note": note or "suspicious_request",
+            }
+        )
+    )
+    g.attack_logged = True
+    return entry
+
+
+@app.before_request
+def capture_suspicious_requests():
+    if getattr(g, "attack_logged", False):
+        return
+    log_security_event(request)
 
 
 @app.route("/")
@@ -390,12 +903,15 @@ def register():
     confirm = request.form.get("confirm_password", "")
 
     if not name or not email or not password:
+        g.audit_status = "Failed"
         flash("All fields are required", "error")
         return redirect(url_for("register"))
     if password != confirm:
+        g.audit_status = "Failed"
         flash("Passwords do not match", "error")
         return redirect(url_for("register"))
     if User.query.filter_by(email=email).first() or LegacyUser.query.filter_by(email=email).first():
+        g.audit_status = "Failed"
         flash("Email already exists. Please login.", "error")
         return redirect(url_for("login"))
 
@@ -403,6 +919,7 @@ def register():
     db.session.add(user)
     db.session.commit()
 
+    g.audit_status = "Success"
     flash("Account created successfully", "success")
     return redirect(url_for("login"))
 
@@ -433,19 +950,98 @@ def login():
             password_ok = True
 
     if not user or not password_ok:
+        attempted_identifier = identifier[:120] if identifier else "unknown"
+        log_security_event(
+            request,
+            note=f"failed_login identifier={attempted_identifier}",
+            force=True,
+        )
+        g.audit_status = "Failed"
         flash("Invalid username/email or password", "error")
         return redirect(url_for("login"))
 
     session["user_id"] = user.id
     session["user_name"] = user.name or user.email
+    g.audit_status = "Success"
     flash("Signin successful", "success")
     return redirect(url_for("dashboard"))
 
 
 @app.route("/logout")
 def logout():
+    g.audit_status = "Success"
     session.clear()
     flash("Logged out successfully", "success")
+    return redirect(url_for("login"))
+
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "GET":
+        return render_template("forgot_password.html")
+
+    email = request.form.get("email", "").strip().lower()
+    if not email:
+        g.audit_status = "Failed"
+        flash("Please enter your email address", "error")
+        return redirect(url_for("forgot_password"))
+
+    user = User.query.filter_by(email=email).first()
+
+    if user:
+        token = generate_reset_token(user)
+        reset_link = url_for("reset_password", token=token, _external=True)
+        logging.info(
+            "Password reset requested for %s. Reset link: %s",
+            user.email,
+            reset_link,
+        )
+        flash(
+            f"Reset link generated for demo use. Open this link: {reset_link}",
+            "success",
+        )
+    else:
+        flash(
+            "If this email is registered, a reset link has been generated.",
+            "success",
+        )
+
+    g.audit_status = "Success"
+    return redirect(url_for("forgot_password"))
+
+
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    user = verify_reset_token(token)
+    if user is None:
+        g.audit_status = "Failed"
+        flash("This reset link is invalid or has expired", "error")
+        return redirect(url_for("forgot_password"))
+
+    if request.method == "GET":
+        return render_template("reset_password.html", token=token)
+
+    password = request.form.get("password", "")
+    confirm = request.form.get("confirm_password", "")
+
+    if not password or not confirm:
+        g.audit_status = "Failed"
+        flash("Please fill in both password fields", "error")
+        return redirect(url_for("reset_password", token=token))
+    if len(password) < 8:
+        g.audit_status = "Failed"
+        flash("Password must be at least 8 characters long", "error")
+        return redirect(url_for("reset_password", token=token))
+    if password != confirm:
+        g.audit_status = "Failed"
+        flash("Passwords do not match", "error")
+        return redirect(url_for("reset_password", token=token))
+
+    user.password = generate_password_hash(password)
+    db.session.commit()
+
+    g.audit_status = "Success"
+    flash("Password updated successfully. Please login.", "success")
     return redirect(url_for("login"))
 
 
@@ -499,7 +1095,8 @@ def reports():
 @app.route("/settings")
 @login_required
 def settings():
-    return render_template("Settings.html")
+    current_user = User.query.get(session.get("user_id"))
+    return render_template("Settings.html", current_user=current_user)
 
 
 @app.route("/honeypot-logs")
@@ -577,6 +1174,116 @@ def ip_monitor_data():
             "recent_activity": recent_activity,
         }
     )
+
+
+@app.route("/api/alerts")
+@login_required
+def api_alerts():
+    alerts = list_live_alerts()
+    unread = sum(1 for alert in alerts if not alert["read"])
+    summary = {
+        "total": len(alerts),
+        "unread": unread,
+        "critical": sum(1 for alert in alerts if alert["sev"] == "Critical"),
+        "high": sum(1 for alert in alerts if alert["sev"] == "High"),
+        "medium": sum(1 for alert in alerts if alert["sev"] == "Medium"),
+        "low": sum(1 for alert in alerts if alert["sev"] == "Low"),
+    }
+    return jsonify({"alerts": alerts, "summary": summary})
+
+
+@app.route("/api/alerts/<int:alert_id>/read", methods=["POST"])
+@login_required
+def mark_alert_read(alert_id):
+    state = db.session.get(AlertState, alert_id)
+    if state is None:
+        state = AlertState(attack_log_id=alert_id, is_read=True, is_dismissed=False)
+        db.session.add(state)
+    else:
+        state.is_read = True
+    state.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({"status": "ok"})
+
+
+@app.route("/api/alerts/mark-all-read", methods=["POST"])
+@login_required
+def mark_all_alerts_read():
+    logs = AttackLog.query.all()
+    states = get_alert_state_map([log.id for log in logs])
+    for log in logs:
+        state = states.get(log.id)
+        if state is None:
+            db.session.add(AlertState(attack_log_id=log.id, is_read=True, is_dismissed=False))
+        else:
+            state.is_read = True
+            state.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({"status": "ok"})
+
+
+@app.route("/api/alerts/<int:alert_id>", methods=["DELETE"])
+@login_required
+def dismiss_alert(alert_id):
+    state = db.session.get(AlertState, alert_id)
+    if state is None:
+        state = AlertState(attack_log_id=alert_id, is_read=True, is_dismissed=True)
+        db.session.add(state)
+    else:
+        state.is_read = True
+        state.is_dismissed = True
+    state.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({"status": "deleted"})
+
+
+@app.route("/api/alerts/clear", methods=["DELETE"])
+@login_required
+def clear_alerts():
+    logs = AttackLog.query.all()
+    states = get_alert_state_map([log.id for log in logs])
+    for log in logs:
+        state = states.get(log.id)
+        if state is None:
+            db.session.add(AlertState(attack_log_id=log.id, is_read=True, is_dismissed=True))
+        else:
+            state.is_read = True
+            state.is_dismissed = True
+            state.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({"status": "cleared"})
+
+
+@app.route("/api/analysis")
+@login_required
+def analysis_data():
+    hours = request.args.get("hours", 24, type=int)
+    if hours not in {1, 24, 168, 720}:
+        hours = 24
+    return jsonify(build_analysis_payload(hours))
+
+
+@app.route("/api/audit-logs")
+@login_required
+def audit_logs():
+    limit = request.args.get("limit", 100, type=int)
+    logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(limit).all()
+    return jsonify([serialise_audit_log(log) for log in logs])
+
+
+@app.route("/api/audit-logs/cleanup", methods=["DELETE"])
+@login_required
+def cleanup_audit_logs():
+    days = request.args.get("days", 30, type=int)
+    cutoff = datetime.utcnow().timestamp() - (days * 86400)
+    logs = AuditLog.query.all()
+    deleted = 0
+    for log in logs:
+        if log.timestamp.timestamp() < cutoff:
+            db.session.delete(log)
+            deleted += 1
+    db.session.commit()
+    return jsonify({"status": "ok", "deleted": deleted})
 
 
 @app.route("/honeypot", defaults={"path": ""}, methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])

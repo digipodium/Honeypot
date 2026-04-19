@@ -74,6 +74,21 @@
       background: #4ade80;
       animation: pulse 1.5s infinite;
     }
+    .logout-link {
+      font-size: 12px;
+      color: #fca5a5;
+      text-decoration: none;
+      border: 1px solid #7f1d1d;
+      background: #3b1212;
+      border-radius: 999px;
+      padding: 6px 12px;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .logout-link:hover {
+      background: #4c1616;
+      color: #fecaca;
+      border-color: #991b1b;
+    }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.4; transform: scale(0.8); }
@@ -300,6 +315,7 @@
     </div>
     <div class="nav-right">
       <div class="live-badge"><div class="live-dot"></div> Live</div>
+      <a href="/logout" class="logout-link">Logout</a>
     </div>
   </nav>
 

@@ -324,17 +324,18 @@
 <nav>
   <div class="nav-brand">
     <div class="shield">🛡</div>
-    SecureWatch
+    HONEYPOT
   </div>
   <div class="nav-links">
-    <a href="ip_monitor.html"  class="nav-link">IP Monitor</a>
-    <a href="attack_logs.html" class="nav-link">Attack Logs</a>
-    <a href="firewall.html"    class="nav-link">Firewall</a>
-    <a href="analysis.html"    class="nav-link">Analysis</a>
-    <a href="reports.html"     class="nav-link">Reports</a>
-    <a href="settings.html"    class="nav-link active">Settings</a>
+    <a href="/dashboard" class="nav-link">Dashboard</a>
+    <a href="/attacklogs" class="nav-link">Attack Logs</a>
+    <a href="/IPmonitor" class="nav-link">IP Monitor</a>
+    <a href="/analysis" class="nav-link">Analysis</a>
+    <a href="/reports" class="nav-link">Reports</a>
+    <a href="/settings" class="nav-link active">Settings</a>
   </div>
   <div class="nav-right">
+    <a href="/logout" class="btn btn-secondary" style="text-decoration:none;">Logout</a>
     <div class="live-badge"><div class="live-dot"></div> Live</div>
   </div>
 </nav>
@@ -391,11 +392,11 @@
 
       <div class="card">
         <div class="avatar-wrap">
-          <div class="avatar">AK</div>
+          <div class="avatar">{{ (current_user.name if current_user else session.get("user_name", "Admin"))[:2]|upper }}</div>
           <div class="avatar-info">
-            <div class="avatar-name">Aryan Kumar</div>
+            <div class="avatar-name">{{ current_user.name if current_user else session.get("user_name", "Admin") }}</div>
             <div class="avatar-role">Security Administrator</div>
-            <div class="avatar-email">aryan.kumar@securewatch.io</div>
+            <div class="avatar-email">{{ current_user.email if current_user else "admin@honeypot.local" }}</div>
           </div>
           <div style="margin-left:auto;">
             <button class="btn btn-secondary btn-sm">Change photo</button>
@@ -411,7 +412,7 @@
             <div class="setting-desc">Your display name across the platform.</div>
           </div>
           <div class="setting-control">
-            <input class="setting-input" type="text" value="Aryan Kumar">
+            <input class="setting-input" type="text" value="{{ current_user.name if current_user else session.get('user_name', 'Admin') }}">
           </div>
         </div>
         <div class="setting-row">
@@ -420,7 +421,7 @@
             <div class="setting-desc">Used for alerts and account recovery.</div>
           </div>
           <div class="setting-control">
-            <input class="setting-input" type="email" value="aryan.kumar@securewatch.io">
+            <input class="setting-input" type="email" value="{{ current_user.email if current_user else 'admin@honeypot.local' }}">
           </div>
         </div>
         <div class="setting-row">
@@ -867,7 +868,7 @@
         <div class="setting-row">
           <div class="setting-info">
             <div class="setting-label">Email notifications</div>
-            <div class="setting-desc">aryan.kumar@securewatch.io</div>
+            <div class="setting-desc">{{ current_user.email if current_user else 'admin@honeypot.local' }}</div>
           </div>
           <div class="setting-control">
             <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
@@ -924,7 +925,7 @@
     <!-- ── AUDIT LOGS ── -->
     <div class="settings-section" id="tab-logs">
       <div class="section-title">Audit Logs</div>
-      <div class="section-desc">A record of all administrative actions taken in SecureWatch.</div>
+      <div class="section-desc">A record of all administrative actions taken in Honeypot.</div>
 
       <div class="card">
         <div class="card-header">Recent activity <span>Last 30 days</span></div>
@@ -932,29 +933,22 @@
           <thead>
             <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>Status</th></tr>
           </thead>
-          <tbody>
-            <tr><td class="mono">2026-04-14 09:38</td><td>aryan.kumar</td><td>IP Blocked</td><td>5.34.180.195</td><td><span class="badge b-danger">Blocked</span></td></tr>
-            <tr><td class="mono">2026-04-14 09:25</td><td>aryan.kumar</td><td>Rule Updated</td><td>DDoS threshold</td><td><span class="badge b-success">Saved</span></td></tr>
-            <tr><td class="mono">2026-04-14 08:55</td><td>system</td><td>Auto-blocked</td><td>31.13.90.44</td><td><span class="badge b-danger">Blocked</span></td></tr>
-            <tr><td class="mono">2026-04-13 22:10</td><td>aryan.kumar</td><td>Login</td><td>settings.html</td><td><span class="badge b-success">Success</span></td></tr>
-            <tr><td class="mono">2026-04-13 18:44</td><td>aryan.kumar</td><td>API Key Generated</td><td>sw_dev_…81cc</td><td><span class="badge b-info">Created</span></td></tr>
-            <tr><td class="mono">2026-04-13 14:21</td><td>aryan.kumar</td><td>Block list updated</td><td>185.220.101.0/24</td><td><span class="badge b-success">Saved</span></td></tr>
-            <tr><td class="mono">2026-04-12 11:05</td><td>system</td><td>Auto-blocked</td><td>194.165.16.11</td><td><span class="badge b-danger">Blocked</span></td></tr>
-            <tr><td class="mono">2026-04-12 09:30</td><td>aryan.kumar</td><td>Alert rule created</td><td>Brute force rule</td><td><span class="badge b-success">Saved</span></td></tr>
+          <tbody id="audit-log-body">
+            <tr><td colspan="5" class="mono" style="color:#64748b;">Loading audit logs...</td></tr>
           </tbody>
         </table>
       </div>
 
       <div style="display:flex;gap:8px;">
-        <button class="btn btn-secondary" onclick="toast('Audit logs exported.')">Export CSV</button>
-        <button class="btn btn-secondary" onclick="toast('Logs cleared.')">Clear old logs</button>
+        <button class="btn btn-secondary" onclick="exportAuditLogs()">Export CSV</button>
+        <button class="btn btn-secondary" onclick="clearOldAuditLogs()">Clear old logs</button>
       </div>
     </div>
 
     <!-- ── APPEARANCE ── -->
     <div class="settings-section" id="tab-appearance">
       <div class="section-title">Appearance</div>
-      <div class="section-desc">Customize how SecureWatch looks and feels.</div>
+      <div class="section-desc">Customize how Honeypot looks and feels.</div>
 
       <div class="card">
         <div class="card-header">Theme</div>
@@ -1117,6 +1111,69 @@ function setAccent(color, el){
   el.style.outlineOffset='2px';
   toast('Accent color updated.');
 }
+
+function auditStatusBadge(status){
+  const normalized=(status||'').toLowerCase();
+  const cls = normalized === 'failed' ? 'b-danger' : normalized === 'blocked' ? 'b-danger' : 'b-success';
+  return `<span class="badge ${cls}">${status||'Success'}</span>`;
+}
+
+async function loadAuditLogs(){
+  const body=document.getElementById('audit-log-body');
+  if(!body) return;
+
+  try{
+    const response=await fetch('/api/audit-logs?limit=50');
+    const logs=await response.json();
+    if(!Array.isArray(logs) || !logs.length){
+      body.innerHTML='<tr><td colspan="5" class="mono" style="color:#64748b;">No audit logs found.</td></tr>';
+      return;
+    }
+
+    body.innerHTML=logs.map(log=>`
+      <tr>
+        <td class="mono">${log.ts}</td>
+        <td>${log.user}</td>
+        <td>${log.action}</td>
+        <td>${log.target}</td>
+        <td>${auditStatusBadge(log.status)}</td>
+      </tr>
+    `).join('');
+  } catch(error){
+    body.innerHTML='<tr><td colspan="5" class="mono" style="color:#f87171;">Failed to load audit logs.</td></tr>';
+  }
+}
+
+async function clearOldAuditLogs(){
+  try{
+    const response=await fetch('/api/audit-logs/cleanup?days=30', {method:'DELETE'});
+    const result=await response.json();
+    toast(`${result.deleted || 0} old audit logs cleared.`);
+    loadAuditLogs();
+  } catch(error){
+    toast('Failed to clear audit logs.');
+  }
+}
+
+async function exportAuditLogs(){
+  try{
+    const response=await fetch('/api/audit-logs?limit=500');
+    const logs=await response.json();
+    const headers=['timestamp','user','action','target','status','path','method','ip'];
+    const rows=(Array.isArray(logs) ? logs : []).map(log => headers.map(key => `"${String(log[key] || log.ts || '').replace(/"/g,'""')}"`).join(','));
+    const csv=[headers.join(','), ...rows].join('\n');
+    const blob=new Blob([csv], {type:'text/csv'});
+    const link=document.createElement('a');
+    link.href=URL.createObjectURL(blob);
+    link.download=`audit_logs_${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+    toast('Audit logs exported.');
+  } catch(error){
+    toast('Failed to export audit logs.');
+  }
+}
+
+loadAuditLogs();
 </script>
 </body>
 </html>
