@@ -3,8 +3,14 @@ from datetime import datetime
 import ipaddress
 import json
 import logging
+import os
 import random
+import secrets
+import smtplib
 import time
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from smtplib import SMTPAuthenticationError
 
 from flask import (
     Flask,
@@ -20,15 +26,29 @@ from flask import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
-from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from sqlalchemy import or_
 from werkzeug.security import check_password_hash, generate_password_hash
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
+if load_dotenv:
+    load_dotenv()
 
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret_key"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SMTP_HOST"] = os.getenv("SMTP_HOST", "smtp.gmail.com")
+app.config["SMTP_PORT"] = int(os.getenv("SMTP_PORT", "587"))
+app.config["SMTP_USERNAME"] = os.getenv("SMTP_USERNAME", "")
+app.config["SMTP_PASSWORD"] = os.getenv("SMTP_PASSWORD", "")
+app.config["SMTP_FROM"] = os.getenv("SMTP_FROM", app.config["SMTP_USERNAME"])
+app.config["SMTP_USE_TLS"] = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
+app.config["PASSWORD_RESET_CODE_TTL"] = int(os.getenv("PASSWORD_RESET_CODE_TTL", "600"))
 
 db = SQLAlchemy(app)
 
@@ -133,24 +153,86 @@ def render_auth_page(active_tab="login"):
     return render_template("login.html", active_tab=active_tab)
 
 
-def get_reset_serializer():
-    return URLSafeTimedSerializer(app.config["SECRET_KEY"])
+def generate_verification_code():
+    return f"{secrets.randbelow(1000000):06d}"
 
 
-def generate_reset_token(user):
-    return get_reset_serializer().dumps(user.email, salt="password-reset")
+def clear_password_reset_session():
+    for key in (
+        "password_reset_email",
+        "password_reset_code_hash",
+        "password_reset_expires_at",
+        "password_reset_verified",
+    ):
+        session.pop(key, None)
 
 
-def verify_reset_token(token, max_age=1800):
-    try:
-        email = get_reset_serializer().loads(
-            token,
-            salt="password-reset",
-            max_age=max_age,
+def send_password_reset_code(recipient_email, code):
+    smtp_username = str(app.config["SMTP_USERNAME"]).strip()
+    smtp_password = str(app.config["SMTP_PASSWORD"]).strip()
+    smtp_from = str(app.config["SMTP_FROM"]).strip() or smtp_username
+
+    if not smtp_username or not smtp_password or not smtp_from:
+        logging.warning(
+            "Password reset email not sent because SMTP is not configured for %s",
+            recipient_email,
         )
-    except (BadSignature, SignatureExpired):
+        return False, "SMTP is not configured yet. Add SMTP settings first."
+
+    message = MIMEMultipart()
+    message["From"] = smtp_from
+    message["To"] = recipient_email
+    message["Subject"] = "Honeypot password reset verification code"
+
+    html_body = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
+        <h2>Password reset verification</h2>
+        <p>You requested to reset your Honeypot account password.</p>
+        <p>Your verification code is:</p>
+        <div style="font-size: 28px; font-weight: 700; letter-spacing: 6px; margin: 16px 0; color: #0f766e;">
+          {code}
+        </div>
+        <p>This code expires in 10 minutes.</p>
+        <p>If you did not request this, you can ignore this email.</p>
+      </body>
+    </html>
+    """
+    message.attach(MIMEText(html_body, "html"))
+
+    try:
+        with smtplib.SMTP(app.config["SMTP_HOST"], app.config["SMTP_PORT"]) as server:
+            if app.config["SMTP_USE_TLS"]:
+                server.starttls()
+            server.login(smtp_username, smtp_password)
+            server.sendmail(smtp_from, recipient_email, message.as_string())
+    except SMTPAuthenticationError:
+        logging.exception("SMTP authentication failed for password reset email")
+        return (
+            False,
+            "Email login failed. For Gmail, use your full Gmail address in SMTP_USERNAME, "
+            "use a Google App Password in SMTP_PASSWORD, and keep SMTP_FROM the same as SMTP_USERNAME.",
+        )
+    except Exception as exc:
+        logging.exception("Failed to send password reset email to %s", recipient_email)
+        return False, "Failed to send verification code. Check your SMTP settings and try again."
+
+    return True, None
+
+
+def get_pending_reset_user():
+    email = session.get("password_reset_email")
+    if not email:
         return None
     return User.query.filter_by(email=email).first()
+
+
+def mask_email(email):
+    if "@" not in email:
+        return email
+    name_part, domain_part = email.split("@", 1)
+    visible = name_part[:2] if len(name_part) > 2 else name_part[:1]
+    return f"{visible}{'*' * max(len(name_part) - len(visible), 1)}@{domain_part}"
 
 
 def find_current_user(identifier):
@@ -987,39 +1069,88 @@ def forgot_password():
         return redirect(url_for("forgot_password"))
 
     user = User.query.filter_by(email=email).first()
-
-    if user:
-        token = generate_reset_token(user)
-        reset_link = url_for("reset_password", token=token, _external=True)
-        logging.info(
-            "Password reset requested for %s. Reset link: %s",
-            user.email,
-            reset_link,
-        )
-        flash(
-            f"Reset link generated for demo use. Open this link: {reset_link}",
-            "success",
-        )
-    else:
-        flash(
-            "If this email is registered, a reset link has been generated.",
-            "success",
-        )
-
-    g.audit_status = "Success"
-    return redirect(url_for("forgot_password"))
-
-
-@app.route("/reset-password/<token>", methods=["GET", "POST"])
-def reset_password(token):
-    user = verify_reset_token(token)
     if user is None:
         g.audit_status = "Failed"
-        flash("This reset link is invalid or has expired", "error")
+        flash("No account was found with that email address", "error")
+        return redirect(url_for("forgot_password"))
+
+    code = generate_verification_code()
+    sent, error_message = send_password_reset_code(user.email, code)
+    if not sent:
+        g.audit_status = "Failed"
+        flash(error_message, "error")
+        return redirect(url_for("forgot_password"))
+
+    session["password_reset_email"] = user.email
+    session["password_reset_code_hash"] = generate_password_hash(code)
+    session["password_reset_expires_at"] = int(time.time()) + app.config["PASSWORD_RESET_CODE_TTL"]
+    session["password_reset_verified"] = False
+
+    g.audit_status = "Success"
+    flash("Verification code sent to your registered email address", "success")
+    return redirect(url_for("verify_reset_code"))
+
+
+@app.route("/verify-reset-code", methods=["GET", "POST"])
+def verify_reset_code():
+    user = get_pending_reset_user()
+    expires_at = session.get("password_reset_expires_at")
+
+    if user is None or expires_at is None:
+        g.audit_status = "Failed"
+        flash("Start with your registered email to reset your password", "error")
+        return redirect(url_for("forgot_password"))
+
+    if int(time.time()) > int(expires_at):
+        clear_password_reset_session()
+        g.audit_status = "Failed"
+        flash("Verification code expired. Please request a new code.", "error")
         return redirect(url_for("forgot_password"))
 
     if request.method == "GET":
-        return render_template("reset_password.html", token=token)
+        return render_template("verify_reset_code.html", email=mask_email(user.email))
+
+    code = request.form.get("code", "").strip()
+    stored_code_hash = session.get("password_reset_code_hash")
+
+    if not code:
+        g.audit_status = "Failed"
+        flash("Please enter the verification code", "error")
+        return redirect(url_for("verify_reset_code"))
+    if not stored_code_hash or not check_password_hash(stored_code_hash, code):
+        g.audit_status = "Failed"
+        flash("Invalid verification code", "error")
+        return redirect(url_for("verify_reset_code"))
+
+    session["password_reset_verified"] = True
+    g.audit_status = "Success"
+    return redirect(url_for("reset_password"))
+
+
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    user = get_pending_reset_user()
+    expires_at = session.get("password_reset_expires_at")
+    is_verified = session.get("password_reset_verified", False)
+
+    if user is None or expires_at is None:
+        g.audit_status = "Failed"
+        flash("Start with your registered email to reset your password", "error")
+        return redirect(url_for("forgot_password"))
+
+    if int(time.time()) > int(expires_at):
+        clear_password_reset_session()
+        g.audit_status = "Failed"
+        flash("Verification code expired. Please request a new code.", "error")
+        return redirect(url_for("forgot_password"))
+
+    if not is_verified:
+        g.audit_status = "Failed"
+        flash("Verify your code first before setting a new password", "error")
+        return redirect(url_for("verify_reset_code"))
+
+    if request.method == "GET":
+        return render_template("reset_password.html", email=mask_email(user.email))
 
     password = request.form.get("password", "")
     confirm = request.form.get("confirm_password", "")
@@ -1027,18 +1158,19 @@ def reset_password(token):
     if not password or not confirm:
         g.audit_status = "Failed"
         flash("Please fill in both password fields", "error")
-        return redirect(url_for("reset_password", token=token))
+        return redirect(url_for("reset_password"))
     if len(password) < 8:
         g.audit_status = "Failed"
         flash("Password must be at least 8 characters long", "error")
-        return redirect(url_for("reset_password", token=token))
+        return redirect(url_for("reset_password"))
     if password != confirm:
         g.audit_status = "Failed"
         flash("Passwords do not match", "error")
-        return redirect(url_for("reset_password", token=token))
+        return redirect(url_for("reset_password"))
 
     user.password = generate_password_hash(password)
     db.session.commit()
+    clear_password_reset_session()
 
     g.audit_status = "Success"
     flash("Password updated successfully. Please login.", "success")

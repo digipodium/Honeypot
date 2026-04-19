@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Forgot Password</title>
+<title>Verify Code</title>
 <style>
   body {
     margin: 0;
@@ -46,7 +46,7 @@
     color: #fff;
     box-sizing: border-box;
   }
-  button, .link-btn {
+  button {
     width: 100%;
     margin-top: 18px;
     padding: 12px;
@@ -55,16 +55,6 @@
     background: #00d4aa;
     color: #06221e;
     font-weight: 700;
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
-    box-sizing: border-box;
-  }
-  .link-btn {
-    margin-top: 10px;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    color: #fff;
   }
   .alert {
     margin-top: 16px;
@@ -78,14 +68,13 @@
   .alert.success {
     background: rgba(0, 212, 170, 0.12);
     border: 1px solid rgba(0, 212, 170, 0.35);
-    word-break: break-word;
   }
 </style>
 </head>
 <body>
   <div class="card">
-    <h1>Forgot password</h1>
-    <p>Enter your registered email address. We will send a verification code to that email so you can reset your password.</p>
+    <h1>Verify code</h1>
+    <p>Enter the verification code sent to {{ email }}.</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}
@@ -93,13 +82,11 @@
       {% endfor %}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('forgot_password') }}">
-      <label for="email">Email address</label>
-      <input id="email" type="email" name="email" placeholder="user@example.com" required>
-      <button type="submit">Send verification code</button>
+    <form method="POST" action="{{ url_for('verify_reset_code') }}">
+      <label for="code">Verification code</label>
+      <input id="code" type="text" name="code" inputmode="numeric" maxlength="6" placeholder="6-digit code" required>
+      <button type="submit">Verify code</button>
     </form>
-
-    <a class="link-btn" href="{{ url_for('login') }}">Back to login</a>
   </div>
 </body>
 </html>
