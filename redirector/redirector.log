@@ -56,3 +56,57 @@
 2026-04-21 14:21:05,026 - INFO - 127.0.0.1 - - [21/Apr/2026 14:21:05] "[32mGET /?q=<script>alert(1)</script> HTTP/1.1[0m" 302 -
 2026-04-21 14:21:07,061 - INFO - FLAGGED IP DETECTED - Automatically redirecting 127.0.0.1 (Target: /)
 2026-04-21 14:21:07,061 - INFO - 127.0.0.1 - - [21/Apr/2026 14:21:07] "[32mGET /?q=cat%20/etc/passwd HTTP/1.1[0m" 302 -
+2026-04-21 14:42:46,240 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:42:46,323 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.18.61:5001
+2026-04-21 14:42:46,323 - INFO - [33mPress CTRL+C to quit[0m
+2026-04-21 14:42:46,340 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:42:47,006 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:42:47,043 - WARNING -  * Debugger is active!
+2026-04-21 14:42:47,048 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:44:12,179 - INFO -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading
+2026-04-21 14:44:12,373 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:44:13,174 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:44:13,212 - WARNING -  * Debugger is active!
+2026-04-21 14:44:13,217 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:44:43,879 - INFO - 127.0.0.1 - - [21/Apr/2026 14:44:43] "GET /products?id=123 HTTP/1.1" 200 -
+2026-04-21 14:44:45,932 - INFO - 127.0.0.1 - - [21/Apr/2026 14:44:45] "GET /products?q=union%20select%201 HTTP/1.1" 200 -
+2026-04-21 14:44:47,964 - INFO - LOGIN ATTEMPT [1/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:44:50,577 - INFO - 127.0.0.1 - - [21/Apr/2026 14:44:50] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:44:52,605 - INFO - LOGIN ATTEMPT [2/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:44:55,152 - INFO - 127.0.0.1 - - [21/Apr/2026 14:44:55] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:44:57,190 - INFO - LOGIN ATTEMPT [3/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:44:59,736 - INFO - 127.0.0.1 - - [21/Apr/2026 14:44:59] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:45:01,778 - INFO - LOGIN ATTEMPT [4/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:45:04,317 - INFO - 127.0.0.1 - - [21/Apr/2026 14:45:04] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:45:06,349 - INFO - LOGIN ATTEMPT [5/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:45:07,914 - WARNING - BRUTE FORCE DETECTED - FLAGGING IP: 127.0.0.1
+2026-04-21 14:45:07,914 - INFO - 127.0.0.1 - - [21/Apr/2026 14:45:07] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 14:45:12,587 - INFO - FLAGGED IP ATTEMPTING LOGIN - Redirecting 127.0.0.1
+2026-04-21 14:45:12,588 - INFO - 127.0.0.1 - - [21/Apr/2026 14:45:12] "[32mGET /login HTTP/1.1[0m" 302 -
+2026-04-21 14:45:14,642 - INFO - 127.0.0.1 - - [21/Apr/2026 14:45:14] "GET /about HTTP/1.1" 200 -
+2026-04-21 14:45:25,595 - INFO -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading
+2026-04-21 14:45:25,778 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:45:26,576 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:45:26,618 - WARNING -  * Debugger is active!
+2026-04-21 14:45:26,624 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:45:54,066 - INFO - 127.0.0.1 - - [21/Apr/2026 14:45:54] "GET /products?id=123 HTTP/1.1" 200 -
+2026-04-21 14:45:57,684 - WARNING - SECURITY ALERT - REDIRECTING [Attack Payload in Query: q=union select 1]. Source IP: 127.0.0.1
+2026-04-21 14:45:57,685 - INFO - 127.0.0.1 - - [21/Apr/2026 14:45:57] "[32mGET /products?q=union%20select%201 HTTP/1.1[0m" 302 -
+2026-04-21 14:45:59,707 - INFO - LOGIN ATTEMPT [1/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:46:02,265 - INFO - 127.0.0.1 - - [21/Apr/2026 14:46:02] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:46:04,303 - INFO - LOGIN ATTEMPT [2/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:46:06,852 - INFO - 127.0.0.1 - - [21/Apr/2026 14:46:06] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:46:08,874 - INFO - LOGIN ATTEMPT [3/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:46:11,437 - INFO - 127.0.0.1 - - [21/Apr/2026 14:46:11] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:46:13,528 - INFO - LOGIN ATTEMPT [4/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:46:16,089 - INFO - 127.0.0.1 - - [21/Apr/2026 14:46:16] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:46:18,130 - INFO - LOGIN ATTEMPT [5/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:46:19,689 - WARNING - BRUTE FORCE DETECTED - FLAGGING IP: 127.0.0.1
+2026-04-21 14:46:19,690 - INFO - 127.0.0.1 - - [21/Apr/2026 14:46:19] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 14:46:24,332 - INFO - FLAGGED IP ATTEMPTING LOGIN - Redirecting 127.0.0.1
+2026-04-21 14:46:24,332 - INFO - 127.0.0.1 - - [21/Apr/2026 14:46:24] "[32mGET /login HTTP/1.1[0m" 302 -
+2026-04-21 14:46:26,364 - INFO - 127.0.0.1 - - [21/Apr/2026 14:46:26] "GET /about HTTP/1.1" 200 -
+2026-04-21 14:49:01,063 - INFO -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading

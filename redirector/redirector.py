@@ -2,19 +2,24 @@ import os
 import logging
 import json
 import time
+import requests
+from urllib.parse import unquote
 from collections import defaultdict
 from flask import Flask, redirect, render_template, request, url_for
 from flask_cors import CORS
 from dotenv import load_dotenv
 
 # Load configuration
-load_dotenv('redirector.env')
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, 'redirector.env'))
 
 app = Flask(__name__)
 CORS(app)
 
 # Configuration
 HONEYPOT_URL = os.getenv('HONEYPOT_URL', 'http://localhost:5000/honeypot')
+HONEYPOT_API_URL = os.getenv('HONEYPOT_API_URL')
+HONEYPOT_API_KEY = os.getenv('HONEYPOT_API_KEY')
 PORT = int(os.getenv('REDIRECTOR_PORT', 5001))
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
@@ -41,8 +46,8 @@ SUSPICIOUS_PATHS = [
 ]
 
 SUSPICIOUS_KEYWORDS = [
-    'union select', 'or 1=1', '<script', 'wget', 'curl', '../', 'drop table', 'truncate',
-    'id', 'whoami', 'cat /etc', 'powershell', 'cmd.exe', 'base64', 'exec(', 'system(',
+    'union select', 'or 1=1', '<script', 'wget ', 'curl ', '../', 'drop table', 'truncate ',
+    'whoami', 'cat /etc', 'powershell', 'cmd.exe', 'exec(', 'system(',
     'eval(', 'alert(', 'javascript:', 'onerror='
 ]
 
@@ -52,6 +57,37 @@ def get_remote_ip():
         return request.headers.get('X-Forwarded-For').split(',')[0].strip()
     return request.remote_addr
 
+def push_log_to_honeypot(ip, method, endpoint, payload, reason=""):
+    """Pushes attack details to the honeypot API for ingestion."""
+    if not HONEYPOT_API_URL or not HONEYPOT_API_KEY:
+        return
+    
+    # Sanitize and format payload
+    if isinstance(payload, bytes):
+        payload = payload.decode('utf-8', errors='ignore')
+    
+    data = {
+        "ip": ip,
+        "method": method,
+        "endpoint": endpoint,
+        "payload": payload,
+        "status": "redirected",
+        "source": request.host_url,
+        "user_agent": request.headers.get('User-Agent'),
+        "timestamp": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+    }
+    
+    try:
+        # Send non-blocking to avoid UX delay (using a short timeout)
+        requests.post(
+            HONEYPOT_API_URL, 
+            json=data, 
+            headers={"X-API-KEY": HONEYPOT_API_KEY},
+            timeout=1.5
+        )
+    except Exception as e:
+        logging.error(f"Failed to push log to honeypot: {e}")
+
 @app.before_request
 def check_for_attacks():
     """
@@ -59,20 +95,12 @@ def check_for_attacks():
     Scans URL path, query parameters, AND POST form data.
     """
     path = request.path
-    query = request.query_string.decode('utf-8').lower()
+    query = unquote(request.query_string.decode('utf-8')).lower()
     ip = get_remote_ip()
     
     # Skip detection for health check and static assets if any
     if path == '/health' or path.startswith('/static'):
         return None
-
-    # Check if this IP is already flagged/banned
-    if ip in FLAGGED_IPS:
-        logging.info(f"FLAGGED IP DETECTED - Automatically redirecting {ip} (Target: {path})")
-        target = f"{HONEYPOT_URL}/{path.lstrip('/')}"
-        if query:
-            target += f"?{query}"
-        return redirect(target, code=302)
 
     is_suspicious = False
     reason = ""
@@ -97,6 +125,10 @@ def check_for_attacks():
                 break
 
     if is_suspicious:
+        # Push attacker details to honeypot before redirecting
+        payload = request.get_data(as_text=True) or (json.dumps(request.form.to_dict()) if request.form else "")
+        push_log_to_honeypot(ip, request.method, path, payload, reason)
+
         # Construct the target URL on the honeypot
         clean_path = path.lstrip('/')
         target = f"{HONEYPOT_URL}/{clean_path}"
@@ -136,14 +168,23 @@ def login():
     """Fake Login Page Lure with Brute-Force Monitoring"""
     ip = get_remote_ip()
     
+    # Persistent redirect for flagged brute-force attackers
+    if ip in FLAGGED_IPS:
+        logging.info(f"FLAGGED IP ATTEMPTING LOGIN - Redirecting {ip}")
+        return redirect(f"{HONEYPOT_URL}/login", code=302)
+
     if request.method == 'POST':
         # Every POST to login is considered a "failed attempt" since this is a lure
         LOGIN_ATTEMPTS[ip] += 1
         count = LOGIN_ATTEMPTS[ip]
         
+        credentials = request.get_data(as_text=True)
         username = request.form.get('username', 'unknown')
         logging.info(f"LOGIN ATTEMPT [{count}/{MAX_LOGIN_ATTEMPTS}] - IP: {ip}, User: {username}")
         
+        # Always push login details to the honeypot for tracking
+        push_log_to_honeypot(ip, "POST", "/login", credentials, f"Login Attempt {count}")
+
         if count >= MAX_LOGIN_ATTEMPTS:
             FLAGGED_IPS.add(ip)
             logging.warning(f"BRUTE FORCE DETECTED - FLAGGING IP: {ip}")
