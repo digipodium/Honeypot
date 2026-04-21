@@ -201,30 +201,16 @@ def build_fake_response(path: str, status: int = 200):
 # MAIN ENTRY POINT  (used by honeypot_bp)
 # ─────────────────────────────────────────
 def capture_request_data(req=None):
-    """
-    Full honeypot pipeline — call this from your honeypot blueprint route.
-
-    Steps:
-        1. Parse     → extract all request fields
-        2. Classify  → detect threat type
-        3. Log       → file + console
-        4. Save      → write to AttackLog DB table
-        5. Respond   → return believable fake Flask response
-
-    Usage in app/routes/honeypot.py:
-
-        from flask import request
-        from app.utils.request_capture import capture_request_data
-
-        @honeypot_bp.route('/<path:path>',
-                           methods=['GET','POST','PUT','DELETE','PATCH','OPTIONS'])
-        def honeypot(path):
-            return capture_request_data(request)
-    """
     if req is None:
         req = request  # fallback to Flask's global request context
 
     capture = parse_request_data(req)
+    
+    # Do not log login or register interactions
+    path = capture.get("path", "").lower()
+    if "login" in path or "register" in path:
+        return build_fake_response(req.path)
+
     threats = classify_threat(capture)
 
     log_capture(capture, threats)

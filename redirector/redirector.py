@@ -125,9 +125,15 @@ def check_for_attacks():
                 break
 
     if is_suspicious:
-        # Push attacker details to honeypot before redirecting
-        payload = request.get_data(as_text=True) or (json.dumps(request.form.to_dict()) if request.form else "")
-        push_log_to_honeypot(ip, request.method, path, payload, reason)
+        # Do not log login or register interactions as per user request
+        lowered_path = path.lower()
+        if "login" in lowered_path or "register" in lowered_path:
+            # Continue to construct target and redirect, but skip push_log_to_honeypot
+            pass
+        else:
+            # Push attacker details to honeypot before redirecting
+            payload = request.get_data(as_text=True) or (json.dumps(request.form.to_dict()) if request.form else "")
+            push_log_to_honeypot(ip, request.method, path, payload, reason)
 
         # Construct the target URL on the honeypot
         clean_path = path.lstrip('/')
@@ -180,10 +186,9 @@ def login():
         
         credentials = request.get_data(as_text=True)
         username = request.form.get('username', 'unknown')
-        logging.info(f"LOGIN ATTEMPT [{count}/{MAX_LOGIN_ATTEMPTS}] - IP: {ip}, User: {username}")
-        
-        # Always push login details to the honeypot for tracking
-        push_log_to_honeypot(ip, "POST", "/login", credentials, f"Login Attempt {count}")
+        # Interaction logging for login is disabled as per user request
+        # logging.info(f"LOGIN ATTEMPT [{count}/{MAX_LOGIN_ATTEMPTS}] - IP: {ip}, User: {username}")
+        # push_log_to_honeypot(ip, "POST", "/login", credentials, f"Login Attempt {count}")
 
         if count >= MAX_LOGIN_ATTEMPTS:
             FLAGGED_IPS.add(ip)

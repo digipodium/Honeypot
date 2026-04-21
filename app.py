@@ -815,6 +815,10 @@ def get_dummy_response(path):
 
 
 def log_attack(req):
+    path = req.path.lower()
+    if "login" in path or "register" in path:
+        return None
+
     body = req.get_data(as_text=True)[:500]
     headers = {
         key: value
@@ -997,9 +1001,14 @@ def should_log_suspicious_request(req, capture=None):
         return False
     if req.path in REQUEST_LOG_EXCLUDED_PATHS:
         return False
+    
+    lowered_path = req.path.lower()
+    if "login" in lowered_path or "register" in lowered_path:
+        return False
+
     if req.path.startswith("/honeypot"):
         return False
-    if req.endpoint == "static":
+    if request.endpoint == "static":
         return False
 
     capture = capture or build_request_capture(req)
@@ -1013,6 +1022,10 @@ def should_log_suspicious_request(req, capture=None):
 
 def log_security_event(req, note=None, force=False):
     if getattr(g, "attack_logged", False):
+        return None
+
+    path = req.path.lower()
+    if "login" in path or "register" in path:
         return None
 
     capture = build_request_capture(req)
@@ -1378,6 +1391,11 @@ def api_logs():
 
     if not endpoint:
         return jsonify({"error": "Missing required field: endpoint"}), 400
+    
+    # Do not log login or register interactions
+    lowered_endpoint = endpoint.lower()
+    if "login" in lowered_endpoint or "register" in lowered_endpoint:
+        return jsonify({"status": "ignored", "reason": "login/register interaction"}), 200
 
     is_alert, reason = detect_external_alert(
         ip_address=ip_address,
