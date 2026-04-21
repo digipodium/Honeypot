@@ -1,0 +1,29 @@
+2026-04-20 23:54:35,205 - INFO - Starting development server on http://localhost:5001
+2026-04-20 23:54:35,267 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.104.179.140:5001
+2026-04-20 23:54:35,268 - INFO - [33mPress CTRL+C to quit[0m
+2026-04-20 23:54:35,289 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-20 23:54:35,618 - INFO - Starting development server on http://localhost:5001
+2026-04-20 23:54:35,641 - WARNING -  * Debugger is active!
+2026-04-20 23:54:35,650 - INFO -  * Debugger PIN: 925-345-474
+2026-04-20 23:54:45,631 - INFO - 127.0.0.1 - - [20/Apr/2026 23:54:45] "GET / HTTP/1.1" 200 -
+2026-04-20 23:54:46,133 - INFO - 127.0.0.1 - - [20/Apr/2026 23:54:46] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-20 23:54:56,418 - WARNING - REDIRECTING [Suspicious Path]: /wp-admin -> http://localhost:5000/honeypot/wp-admin
+2026-04-20 23:54:56,419 - INFO - 127.0.0.1 - - [20/Apr/2026 23:54:56] "[32mGET /wp-admin HTTP/1.1[0m" 302 -
+2026-04-20 23:58:02,051 - INFO -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading
+2026-04-20 23:58:02,182 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-20 23:58:02,722 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-20 23:58:02,750 - WARNING -  * Debugger is active!
+2026-04-20 23:58:02,756 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 00:00:39,085 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:39] "GET / HTTP/1.1" 200 -
+2026-04-21 00:00:45,031 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:45] "GET / HTTP/1.1" 200 -
+2026-04-21 00:00:46,294 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:46] "GET /products HTTP/1.1" 200 -
+2026-04-21 00:00:50,797 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:50] "GET /about HTTP/1.1" 200 -
+2026-04-21 00:00:52,134 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:52] "GET /contact HTTP/1.1" 200 -
+2026-04-21 00:00:53,738 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:53] "GET /contact HTTP/1.1" 200 -
+2026-04-21 00:00:57,452 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:57] "GET /products HTTP/1.1" 200 -
+2026-04-21 00:00:58,654 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:58] "GET /products?id=309 HTTP/1.1" 200 -
+2026-04-21 00:00:59,978 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:59] "GET /products?id=205 HTTP/1.1" 200 -
+2026-04-21 00:01:01,077 - INFO - 127.0.0.1 - - [21/Apr/2026 00:01:01] "GET /products?id=101 HTTP/1.1" 200 -

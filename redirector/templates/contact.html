@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us | Nova-Tech Solutions{% endblock %}
+
+{% block content %}
+<section style="max-width: 800px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 60px;">
+        <h1 style="font-size: 3rem; margin-bottom: 16px;">Get in <span class="gradient-text">Touch</span></h1>
+        <p class="subtitle">Have questions? Our team of experts is here to help you scale.</p>
+    </div>
+
+    <div class="card" style="background: var(--surface); border: 1px solid var(--border); padding: 48px; border-radius: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+        <form action="/contact" method="POST">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div>
+                    <label style="display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; font-weight: 600;">Full Name</label>
+                    <input type="text" name="name" class="input-field" placeholder="John Doe" required>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; font-weight: 600;">Email Address</label>
+                    <input type="email" name="email" class="input-field" placeholder="john@example.com" required>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; font-weight: 600;">Subject</label>
+                <input type="text" name="subject" class="input-field" placeholder="How can we help?">
+            </div>
+
+            <div style="margin-bottom: 32px;">
+                <label style="display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; font-weight: 600;">Message</label>
+                <textarea name="message" class="input-field" style="min-height: 150px; resize: vertical;" placeholder="Your message here..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1rem;">Send Message</button>
+        </form>
+    </div>
+</section>
+
+<style>
+    .input-field {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 18px;
+        color: #fff;
+        font-family: inherit;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .input-field:focus {
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.05);
+    }
+</style>
+{% endblock %}

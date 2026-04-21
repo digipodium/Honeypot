@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <h1>Scale your <span class="gradient-text">Intelligence</span> with Nova-Tech</h1>
+    <p class="subtitle">The world's most advanced cloud-native architecture for high-performance computing and secure data processing.</p>
+    <div style="display: flex; gap: 16px; justify-content: center;">
+        <a href="/products" class="btn btn-primary">Explore Products</a>
+        <a href="/about" class="btn" style="border: 1px solid var(--border); color: #fff;">Learn More</a>
+    </div>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
+    <div class="card" style="background: var(--surface); border: 1px solid var(--border); padding: 40px; border-radius: 24px;">
+        <h3 style="margin-bottom: 16px; color: var(--primary);">01. Security</h3>
+        <p style="color: var(--text-dim);">Enterprise-grade encryption and real-time threat detection for your most sensitive workloads.</p>
+    </div>
+    <div class="card" style="background: var(--surface); border: 1px solid var(--border); padding: 40px; border-radius: 24px;">
+        <h3 style="margin-bottom: 16px; color: var(--primary);">02. Performance</h3>
+        <p style="color: var(--text-dim);">Unmatched speed with our proprietary edge-computing network and global CDN.</p>
+    </div>
+    <div class="card" style="background: var(--surface); border: 1px solid var(--border); padding: 40px; border-radius: 24px;">
+        <h3 style="margin-bottom: 16px; color: var(--primary);">03. Scalability</h3>
+        <p style="color: var(--text-dim);">Auto-scaling Infrastructure that grows seamlessly with your business needs.</p>
+    </div>
+</section>
+
+<section style="text-align: center; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%); padding: 100px 40px; border-radius: 40px; border: 1px solid var(--border);">
+    <h2 style="font-size: 2.5rem; margin-bottom: 24px;">Ready to build the future?</h2>
+    <p style="color: var(--text-dim); margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Join 5,000+ companies already using Nova-Tech to power their mission-critical applications.
+    </p>
+    <a href="/contact" class="btn btn-primary">Schedule a Demo</a>
+</section>
+{% endblock %}
