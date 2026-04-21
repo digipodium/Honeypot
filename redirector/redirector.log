@@ -27,3 +27,20 @@
 2026-04-21 00:00:58,654 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:58] "GET /products?id=309 HTTP/1.1" 200 -
 2026-04-21 00:00:59,978 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:59] "GET /products?id=205 HTTP/1.1" 200 -
 2026-04-21 00:01:01,077 - INFO - 127.0.0.1 - - [21/Apr/2026 00:01:01] "GET /products?id=101 HTTP/1.1" 200 -
+2026-04-21 12:54:58,566 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 12:54:58,636 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.18.16:5001
+2026-04-21 12:54:58,636 - INFO - [33mPress CTRL+C to quit[0m
+2026-04-21 12:54:58,639 - INFO -  * Restarting with stat
+2026-04-21 12:54:59,245 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 12:54:59,279 - WARNING -  * Debugger is active!
+2026-04-21 12:54:59,285 - INFO -  * Debugger PIN: 143-866-343
+2026-04-21 12:55:42,960 - INFO - 127.0.0.1 - - [21/Apr/2026 12:55:42] "GET / HTTP/1.1" 200 -
+2026-04-21 12:55:43,340 - INFO - 127.0.0.1 - - [21/Apr/2026 12:55:43] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-21 12:55:52,003 - INFO - 127.0.0.1 - - [21/Apr/2026 12:55:52] "GET /products HTTP/1.1" 200 -
+2026-04-21 12:55:54,052 - INFO - 127.0.0.1 - - [21/Apr/2026 12:55:54] "GET /products HTTP/1.1" 200 -
+2026-04-21 12:55:54,907 - INFO - 127.0.0.1 - - [21/Apr/2026 12:55:54] "GET /about HTTP/1.1" 200 -
+2026-04-21 12:55:55,983 - INFO - 127.0.0.1 - - [21/Apr/2026 12:55:55] "GET /contact HTTP/1.1" 200 -
+2026-04-21 12:55:57,448 - INFO - 127.0.0.1 - - [21/Apr/2026 12:55:57] "GET /contact HTTP/1.1" 200 -
