@@ -2473,3 +2473,12 @@ smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepte
 2026-04-21 19:04:34,270 -  * Restarting with stat
 2026-04-21 19:04:35,469 -  * Debugger is active!
 2026-04-21 19:04:35,473 -  * Debugger PIN: 143-866-343
+2026-04-21 19:11:47,096 - {"time": "2026-04-21T13:41:47.038000", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/login", "body": "", "headers": {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"}}
+2026-04-21 19:11:48,229 - 127.0.0.1 - - [21/Apr/2026 19:11:48] "GET /honeypot/login HTTP/1.1" 200 -
+2026-04-21 19:11:57,889 - 127.0.0.1 - - [21/Apr/2026 19:11:57] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 19:11:57,932 - 127.0.0.1 - - [21/Apr/2026 19:11:57] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 19:12:47,313 - 127.0.0.1 - - [21/Apr/2026 19:12:47] "GET /dashboard HTTP/1.1" 200 -
+2026-04-21 19:12:48,795 - 127.0.0.1 - - [21/Apr/2026 19:12:48] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 19:12:49,098 - 127.0.0.1 - - [21/Apr/2026 19:12:49] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 19:12:52,012 - 127.0.0.1 - - [21/Apr/2026 19:12:52] "GET /IPmonitor HTTP/1.1" 200 -
+2026-04-21 19:12:52,073 - 127.0.0.1 - - [21/Apr/2026 19:12:52] "GET /api/ip-monitor HTTP/1.1" 200 -
