@@ -1881,3 +1881,9 @@ smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepte
 2026-04-21 14:20:29,903 -  * Debugger is active!
 2026-04-21 14:20:29,908 -  * Debugger PIN: 925-345-474
 2026-04-21 14:21:17,256 -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\test_redirection.py', reloading
+2026-04-21 14:21:17,686 -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:21:18,990 -  * Debugger is active!
+2026-04-21 14:21:18,994 -  * Debugger PIN: 925-345-474
+2026-04-21 14:24:16,409 - 127.0.0.1 - - [21/Apr/2026 14:24:16] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 14:24:16,442 - 127.0.0.1 - - [21/Apr/2026 14:24:16] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 14:24:23,726 - 127.0.0.1 - - [21/Apr/2026 14:24:23] "GET / HTTP/1.1" 200 -
