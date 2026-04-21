@@ -2245,3 +2245,4 @@ smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepte
 2026-04-21 17:35:24,764 - {"time": "2026-04-21T12:05:24.749176", "ip": "127.0.0.1", "method": "POST", "path": "/login", "body": "body=email=HBSFRSBHJ%40jh446&password=jbhtfsdgtfd", "headers": {"Origin": "http://localhost:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36", "Referer": "http://localhost:5000/login"}, "note": "suspicious_request"}
 2026-04-21 17:35:24,773 - 127.0.0.1 - - [21/Apr/2026 17:35:24] "[32mPOST /login HTTP/1.1[0m" 302 -
 2026-04-21 17:35:25,060 - 127.0.0.1 - - [21/Apr/2026 17:35:25] "GET /login HTTP/1.1" 200 -
+2026-04-21 17:48:02,710 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\app.py', reloading
