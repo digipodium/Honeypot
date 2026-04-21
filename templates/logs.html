@@ -1,126 +1,325 @@
 {% extends "base.html" %}
 
 {% block title %}
-Logs | Honeypot IDS
+External Logs | HoneyTrap IDS
 {% endblock %}
 
 {% block extra_css %}
-
 <style>
-
-body {
-    background: #0f2027;
-    color: white;
-    font-family: Arial, sans-serif;
-}
-
-.logs-container {
-    margin-top: 100px;
+  .logs-shell {
+    margin-top: 90px;
     padding: 20px;
-}
+    color: #e8ecff;
+  }
 
-.logs-title {
-    text-align: center;
-    color: #00ff00;
-    margin-bottom: 30px;
-}
+  .logs-hero {
+    background: radial-gradient(1200px 260px at 10% -20%, rgba(0, 212, 170, 0.18), rgba(8, 12, 24, 0.92));
+    border: 1px solid rgba(0, 212, 170, 0.24);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 16px;
+  }
 
-.logs-table {
-    width: 90%;
-    margin: auto;
-    border-collapse: collapse;
-    background: rgba(0,0,0,0.8);
-}
+  .logs-hero h1 {
+    margin: 0 0 8px;
+    font-size: 1.45rem;
+    color: #8fffe7;
+  }
 
-.logs-table th {
-    background: #00ff00;
-    color: black;
+  .logs-hero p {
+    margin: 0;
+    color: #b8c5de;
+  }
+
+  .filters-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    gap: 10px;
+    margin: 14px 0;
+  }
+
+  .filters-row input,
+  .filters-row select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: rgba(10, 14, 25, 0.92);
+    color: #e8ecff;
+  }
+
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(120px, 1fr));
+    gap: 10px;
+    margin: 12px 0 16px;
+  }
+
+  .metric-card {
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgba(11, 16, 28, 0.92);
+    border-radius: 12px;
     padding: 12px;
-}
+  }
 
-.logs-table td {
+  .metric-label {
+    color: #93a1be;
+    font-size: 0.78rem;
+  }
+
+  .metric-value {
+    font-size: 1.1rem;
+    color: #dff7ff;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  .chart-wrap {
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgba(11, 16, 28, 0.92);
+    border-radius: 12px;
     padding: 10px;
-    border-bottom: 1px solid #333;
-    text-align: center;
-}
+    margin-bottom: 16px;
+  }
 
-.logs-table tr:hover {
-    background: #111;
-}
+  .table-wrap {
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 14px;
+    overflow: auto;
+    background: rgba(8, 12, 24, 0.95);
+  }
 
-.status-high {
-    color: red;
-}
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 980px;
+  }
 
-.status-medium {
-    color: orange;
-}
+  th {
+    text-align: left;
+    padding: 12px;
+    font-size: 0.78rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #8fa0c4;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  }
 
-.status-low {
-    color: yellow;
-}
+  td {
+    padding: 11px 12px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+    color: #dbe7ff;
+    font-size: 0.88rem;
+    vertical-align: top;
+  }
 
+  tr.alert-row {
+    background: rgba(220, 38, 38, 0.12);
+  }
+
+  .badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    border: 1px solid transparent;
+  }
+
+  .badge.alert {
+    background: rgba(239, 68, 68, 0.18);
+    color: #fecaca;
+    border-color: rgba(248, 113, 113, 0.5);
+  }
+
+  .badge.ok {
+    background: rgba(34, 197, 94, 0.16);
+    color: #bbf7d0;
+    border-color: rgba(74, 222, 128, 0.5);
+  }
+
+  .payload-cell {
+    max-width: 340px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  @media (max-width: 900px) {
+    .filters-row {
+      grid-template-columns: 1fr 1fr;
+    }
+    .metrics-row {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
-
 {% endblock %}
 
 {% block content %}
+<div class="logs-shell">
+  <div class="logs-hero">
+    <h1>Dummy Site Activity Monitor</h1>
+    <p>Live external request feed from monitored dummy website with suspicious-activity highlighting.</p>
+  </div>
 
-<div class="logs-container">
+  <div class="filters-row">
+    <input id="filterIp" type="text" placeholder="Filter by IP">
+    <select id="filterStatus">
+      <option value="">All statuses</option>
+      <option value="success">success</option>
+      <option value="failed">failed</option>
+      <option value="error">error</option>
+      <option value="blocked">blocked</option>
+      <option value="unknown">unknown</option>
+    </select>
+    <input id="filterEndpoint" type="text" placeholder="Filter by endpoint">
+    <select id="filterAlert">
+      <option value="false">All logs</option>
+      <option value="true">Alerts only</option>
+    </select>
+  </div>
 
-    <h1 class="logs-title">Honeypot Attack Logs</h1>
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-label">Last 60m total logs</div>
+      <div class="metric-value" id="metricTotal">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Last 60m alerts</div>
+      <div class="metric-value" id="metricAlerts">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Last 60m failed</div>
+      <div class="metric-value" id="metricFailed">0</div>
+    </div>
+  </div>
 
-    <table class="logs-table">
+  <div class="chart-wrap">
+    <canvas id="logsChart" height="90"></canvas>
+  </div>
 
+  <div class="table-wrap">
+    <table>
+      <thead>
         <tr>
-            <th>ID</th>
-            <th>IP Address</th>
-            <th>Attack Type</th>
-            <th>Port</th>
-            <th>Time</th>
-            <th>Severity</th>
+          <th>Time</th>
+          <th>Source</th>
+          <th>IP</th>
+          <th>Method</th>
+          <th>Endpoint</th>
+          <th>Status</th>
+          <th>Alert</th>
+          <th>Payload</th>
         </tr>
-
-        <!-- Sample Data -->
-
-        <tr>
-            <td>1</td>
-            <td>192.168.1.10</td>
-            <td>Brute Force</td>
-            <td>22</td>
-            <td>10:30 AM</td>
-            <td class="status-high">High</td>
-        </tr>
-
-        <tr>
-            <td>2</td>
-            <td>10.0.0.5</td>
-            <td>SQL Injection</td>
-            <td>80</td>
-            <td>11:00 AM</td>
-            <td class="status-medium">Medium</td>
-        </tr>
-
-        <tr>
-            <td>3</td>
-            <td>172.16.0.2</td>
-            <td>Port Scan</td>
-            <td>443</td>
-            <td>12:15 PM</td>
-            <td class="status-low">Low</td>
-        </tr>
-
-        <tr>
-            <td>4</td>
-            <td>203.45.67.12</td>
-            <td>Malware Attempt</td>
-            <td>21</td>
-            <td>01:30 PM</td>
-            <td class="status-high">High</td>
-        </tr>
-
+      </thead>
+      <tbody id="logsBody">
+        <tr><td colspan="8">Loading logs...</td></tr>
+      </tbody>
     </table>
-
+  </div>
 </div>
 
+<script>
+  const chartCanvas = document.getElementById("logsChart");
+  const chartCtx = chartCanvas.getContext("2d");
+  const logsBody = document.getElementById("logsBody");
+  const filterIp = document.getElementById("filterIp");
+  const filterStatus = document.getElementById("filterStatus");
+  const filterEndpoint = document.getElementById("filterEndpoint");
+  const filterAlert = document.getElementById("filterAlert");
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function drawChart(labels, values) {
+    const width = chartCanvas.clientWidth || 800;
+    const height = chartCanvas.height;
+    chartCanvas.width = width;
+    chartCtx.clearRect(0, 0, width, height);
+
+    const maxVal = Math.max(1, ...values);
+    const stepX = values.length > 1 ? width / (values.length - 1) : width;
+    chartCtx.lineWidth = 2;
+    chartCtx.strokeStyle = "#22d3ee";
+    chartCtx.beginPath();
+
+    values.forEach((val, idx) => {
+      const x = idx * stepX;
+      const y = height - ((val / maxVal) * (height - 18)) - 8;
+      if (idx === 0) chartCtx.moveTo(x, y);
+      else chartCtx.lineTo(x, y);
+    });
+    chartCtx.stroke();
+  }
+
+  async function fetchStats() {
+    const response = await fetch("/api/external-logs/stats?minutes=60", { credentials: "same-origin" });
+    if (!response.ok) return;
+    const data = await response.json();
+    document.getElementById("metricTotal").textContent = data.total;
+    document.getElementById("metricAlerts").textContent = data.alerts;
+    document.getElementById("metricFailed").textContent = data.failed;
+    drawChart(data.labels, data.values);
+  }
+
+  function buildQuery() {
+    const params = new URLSearchParams();
+    if (filterIp.value.trim()) params.set("ip", filterIp.value.trim());
+    if (filterStatus.value) params.set("status", filterStatus.value);
+    if (filterEndpoint.value.trim()) params.set("endpoint", filterEndpoint.value.trim());
+    if (filterAlert.value === "true") params.set("alert_only", "true");
+    params.set("limit", "250");
+    return params.toString();
+  }
+
+  async function fetchLogs() {
+    const response = await fetch(`/api/external-logs?${buildQuery()}`, { credentials: "same-origin" });
+    if (!response.ok) {
+      logsBody.innerHTML = "<tr><td colspan='8'>Failed to load logs.</td></tr>";
+      return;
+    }
+
+    const rows = await response.json();
+    if (!rows.length) {
+      logsBody.innerHTML = "<tr><td colspan='8'>No logs found for selected filters.</td></tr>";
+      return;
+    }
+
+    logsBody.innerHTML = rows.map((row) => {
+      const time = new Date(row.timestamp).toLocaleString();
+      const statusClass = row.is_alert ? "alert" : "ok";
+      const alertText = row.is_alert ? row.alert_reason || "ALERT" : "Normal";
+      return `
+        <tr class="${row.is_alert ? "alert-row" : ""}">
+          <td>${escapeHtml(time)}</td>
+          <td>${escapeHtml(row.source)}</td>
+          <td>${escapeHtml(row.ip_address)}</td>
+          <td>${escapeHtml(row.method)}</td>
+          <td>${escapeHtml(row.endpoint)}</td>
+          <td>${escapeHtml(row.status)}</td>
+          <td><span class="badge ${statusClass}">${escapeHtml(alertText)}</span></td>
+          <td class="payload-cell" title="${escapeHtml(row.payload)}">${escapeHtml(row.payload || "-")}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  const filterInputs = [filterIp, filterStatus, filterEndpoint, filterAlert];
+  filterInputs.forEach((el) => el.addEventListener("input", fetchLogs));
+  filterInputs.forEach((el) => el.addEventListener("change", fetchLogs));
+
+  async function refreshAll() {
+    await Promise.all([fetchLogs(), fetchStats()]);
+  }
+
+  refreshAll();
+  setInterval(refreshAll, 8000);
+  window.addEventListener("resize", fetchStats);
+</script>
 {% endblock %}

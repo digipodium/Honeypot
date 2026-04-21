@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DRAPE — Modern Clothing</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts: Playfair Display + DM Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ==============================
+       NAVBAR
+  ============================== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <!-- Logo -->
+      <a href="#home" class="logo" onclick="showPage('home')">DRAPE</a>
+
+      <!-- Nav Links (desktop) -->
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home"    onclick="showPage('home')"   class="nav-link active">Home</a></li>
+        <li><a href="#shop"    onclick="showPage('shop')"   class="nav-link">Shop</a></li>
+        <li><a href="#about"   onclick="showPage('about')"  class="nav-link">About</a></li>
+        <li><a href="#contact" onclick="showPage('contact')" class="nav-link">Contact</a></li>
+      </ul>
+
+      <!-- Cart Icon -->
+      <button class="cart-btn" onclick="toggleCart()" aria-label="Open cart">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+
+      <!-- Hamburger (mobile) -->
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==============================
+       PAGE: HOME
+  ============================== -->
+  <div id="page-home" class="page active">
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="hero-content">
+        <span class="hero-tag">New Collection · 2025</span>
+        <h1 class="hero-title">Wear What<br/><em>Moves You</em></h1>
+        <p class="hero-sub">Timeless pieces crafted for the modern wardrobe. Effortless style, every day.</p>
+        <button class="btn btn-primary" onclick="showPage('shop')">Shop Now</button>
+      </div>
+      <div class="hero-image-wrap">
+        <div class="hero-img-bg"></div>
+        <!-- Decorative floating badges -->
+        <div class="badge badge-1">New In</div>
+        <div class="badge badge-2">Free Shipping</div>
+      </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="featured" id="featured">
+      <div class="section-header">
+        <span class="section-tag">Handpicked for You</span>
+        <h2 class="section-title">Featured Collection</h2>
+      </div>
+      <div class="products-grid" id="featuredGrid">
+        <!-- Populated by script.js -->
+      </div>
+      <div class="center-btn">
+        <button class="btn btn-outline" onclick="showPage('shop')">View All Products</button>
+      </div>
+    </section>
+
+    <!-- Brand Strip -->
+    <section class="brand-strip">
+      <span>Free Returns</span><span class="divider">·</span>
+      <span>Sustainable Fabrics</span><span class="divider">·</span>
+      <span>Worldwide Shipping</span><span class="divider">·</span>
+      <span>Secure Payments</span>
+    </section>
+
+  </div>
+
+  <!-- ==============================
+       PAGE: SHOP
+  ============================== -->
+  <div id="page-shop" class="page">
+    <section class="shop-section">
+      <div class="shop-header">
+        <h2 class="section-title">The Shop</h2>
+        <!-- Category filter buttons -->
+        <div class="filter-bar" id="filterBar">
+          <button class="filter-btn active" onclick="filterProducts('all', this)">All</button>
+          <button class="filter-btn" onclick="filterProducts('shirts', this)">Shirts</button>
+          <button class="filter-btn" onclick="filterProducts('hoodies', this)">Hoodies</button>
+          <button class="filter-btn" onclick="filterProducts('jeans', this)">Jeans</button>
+          <button class="filter-btn" onclick="filterProducts('jackets', this)">Jackets</button>
+        </div>
+      </div>
+      <div class="products-grid" id="shopGrid">
+        <!-- Populated by script.js -->
+      </div>
+    </section>
+  </div>
+
+  <!-- ==============================
+       PAGE: PRODUCT DETAIL
+  ============================== -->
+  <div id="page-detail" class="page">
+    <section class="detail-section">
+      <button class="back-btn" onclick="goBack()">← Back</button>
+      <div class="detail-layout" id="detailContent">
+        <!-- Populated dynamically -->
+      </div>
+    </section>
+  </div>
+
+  <!-- ==============================
+       PAGE: ABOUT
+  ============================== -->
+  <div id="page-about" class="page">
+    <section class="about-section" id="about">
+      <div class="about-img-col">
+        <div class="about-img-placeholder">
+          <!-- Decorative SVG -->
+          <svg viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle"
+                  font-family="Playfair Display, serif" font-size="64" fill="#c8a96e" opacity="0.3">D</text>
+            <text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle"
+                  font-family="DM Sans, sans-serif" font-size="14" fill="#ffffff" opacity="0.5" letter-spacing="6">DRAPE</text>
+          </svg>
+        </div>
+      </div>
+      <div class="about-text-col">
+        <span class="section-tag">Our Story</span>
+        <h2 class="section-title">Built on Craft,<br/>Worn with Purpose</h2>
+        <p>DRAPE was founded in 2018 with a single belief: great clothing doesn't have to compromise between style and conscience. We partner with ethical factories across Portugal, Japan, and India to create garments that feel as good as they look.</p>
+        <p>Every stitch, every seam, every fabric choice is intentional. We produce in limited runs to reduce waste and ensure that what we make truly lasts — not just in quality, but in timeless design.</p>
+        <p>We believe the best wardrobe is a thoughtful one. That's why our collections are small, deliberate, and built to mix and match effortlessly across seasons.</p>
+        <div class="about-stats">
+          <div class="stat"><strong>50+</strong><span>Ethical Partners</span></div>
+          <div class="stat"><strong>12</strong><span>Collections</span></div>
+          <div class="stat"><strong>80K+</strong><span>Happy Customers</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==============================
+       PAGE: CONTACT
+  ============================== -->
+  <div id="page-contact" class="page">
+    <section class="contact-section" id="contact">
+      <div class="contact-info">
+        <span class="section-tag">Get in Touch</span>
+        <h2 class="section-title">We'd Love<br/>to Hear from You</h2>
+        <p>Whether you have a question about sizing, an order, or just want to say hello — our team is here for you.</p>
+        <div class="contact-details">
+          <div>📧 hello@drape.com</div>
+          <div>📞 +1 (800) 327-3111</div>
+          <div>📍 42 Fashion Ave, New York, NY</div>
+        </div>
+      </div>
+      <div class="contact-form-wrap">
+        <form class="contact-form" onsubmit="handleFormSubmit(event)">
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" placeholder="Alex Johnson" required />
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="alex@email.com" required />
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" rows="5" placeholder="Tell us how we can help..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Send Message</button>
+          <p class="form-success" id="formSuccess">✓ Message sent! We'll be in touch soon.</p>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==============================
+       CART SIDEBAR
+  ============================== -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3>Your Cart</h3>
+      <button class="close-cart" onclick="toggleCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <!-- Cart items populated by JS -->
+    </div>
+    <div class="cart-footer" id="cartFooter">
+      <!-- Total & checkout button -->
+    </div>
+  </aside>
+
+  <!-- ==============================
+       FOOTER
+  ============================== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo">DRAPE</span>
+        <p>Timeless style, conscious craft.</p>
+      </div>
+      <div class="footer-links">
+        <strong>Navigate</strong>
+        <a href="#" onclick="showPage('home')">Home</a>
+        <a href="#" onclick="showPage('shop')">Shop</a>
+        <a href="#" onclick="showPage('about')">About</a>
+        <a href="#" onclick="showPage('contact')">Contact</a>
+      </div>
+      <div class="footer-links">
+        <strong>Support</strong>
+        <a href="#">Size Guide</a>
+        <a href="#">Returns</a>
+        <a href="#">Shipping</a>
+        <a href="#">FAQ</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 DRAPE. All rights reserved.</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

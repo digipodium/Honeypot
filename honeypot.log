@@ -1819,3 +1819,27 @@ smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepte
 2026-04-19 13:53:23,804 - 127.0.0.1 - - [19/Apr/2026 13:53:23] "GET /login HTTP/1.1" 200 -
 2026-04-19 13:54:17,419 - 127.0.0.1 - - [19/Apr/2026 13:54:17] "GET /login HTTP/1.1" 200 -
 2026-04-19 13:54:53,240 - 127.0.0.1 - - [19/Apr/2026 13:54:53] "GET /login HTTP/1.1" 200 -
+2026-04-19 15:26:31,763 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\app.py', reloading
+2026-04-19 15:26:32,118 -  * Restarting with stat
+2026-04-19 15:26:32,893 -  * Debugger is active!
+2026-04-19 15:26:32,896 -  * Debugger PIN: 143-866-343
+2026-04-19 15:26:42,947 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\app.py', reloading
+2026-04-19 15:26:43,171 -  * Restarting with stat
+2026-04-19 15:26:43,794 -  * Debugger is active!
+2026-04-19 15:26:43,797 -  * Debugger PIN: 143-866-343
+2026-04-19 15:26:58,862 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\app.py', reloading
+2026-04-19 15:26:59,022 -  * Restarting with stat
+2026-04-19 15:26:59,581 -  * Debugger is active!
+2026-04-19 15:26:59,583 -  * Debugger PIN: 143-866-343
+2026-04-19 15:27:04,616 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\app.py', reloading
+2026-04-19 15:27:04,779 -  * Restarting with stat
+2026-04-19 15:27:05,359 -  * Debugger is active!
+2026-04-19 15:27:05,361 -  * Debugger PIN: 143-866-343
+2026-04-19 15:27:31,470 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\app.py', reloading
+2026-04-19 15:27:31,671 -  * Restarting with stat
+2026-04-19 15:27:32,377 -  * Debugger is active!
+2026-04-19 15:27:32,379 -  * Debugger PIN: 143-866-343
+2026-04-19 16:22:49,133 - 127.0.0.1 - - [19/Apr/2026 16:22:49] "GET / HTTP/1.1" 200 -
+2026-04-19 16:23:00,646 - 127.0.0.1 - - [19/Apr/2026 16:23:00] "GET / HTTP/1.1" 200 -
+2026-04-19 16:23:06,150 - 127.0.0.1 - - [19/Apr/2026 16:23:06] "GET /login HTTP/1.1" 200 -
+2026-04-19 16:23:20,645 - 127.0.0.1 - - [19/Apr/2026 16:23:20] "GET /login HTTP/1.1" 200 -

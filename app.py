@@ -1,5 +1,5 @@
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timedelta
 import ipaddress
 import json
 import logging
@@ -19,10 +19,11 @@ from flask import (
     jsonify,
     make_response,
     redirect,
-    render_template,
+    render_template, 
     request,
     session,
     url_for,
+    send_from_directory,
 )
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
@@ -49,6 +50,9 @@ app.config["SMTP_PASSWORD"] = os.getenv("SMTP_PASSWORD", "")
 app.config["SMTP_FROM"] = os.getenv("SMTP_FROM", app.config["SMTP_USERNAME"])
 app.config["SMTP_USE_TLS"] = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
 app.config["PASSWORD_RESET_CODE_TTL"] = int(os.getenv("PASSWORD_RESET_CODE_TTL", "600"))
+app.config["LOG_API_KEY"] = os.getenv("LOG_API_KEY", "")
+app.config["EXTERNAL_FAILED_LOGIN_THRESHOLD"] = int(os.getenv("EXTERNAL_FAILED_LOGIN_THRESHOLD", "5"))
+app.config["EXTERNAL_FAILED_LOGIN_WINDOW_SEC"] = int(os.getenv("EXTERNAL_FAILED_LOGIN_WINDOW_SEC", "300"))
 
 db = SQLAlchemy(app)
 
@@ -88,6 +92,23 @@ class AttackLog(db.Model):
     body = db.Column(db.Text)
     headers = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+
+class ExternalLog(db.Model):
+    __tablename__ = "external_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    source = db.Column(db.String(80), nullable=False, default="dummy-site", index=True)
+    ip_address = db.Column(db.String(64), nullable=False, index=True)
+    user_agent = db.Column(db.String(512))
+    endpoint = db.Column(db.String(500), nullable=False, index=True)
+    method = db.Column(db.String(16), nullable=False, index=True)
+    status = db.Column(db.String(40), nullable=False, default="unknown", index=True)
+    payload = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+    is_alert = db.Column(db.Boolean, nullable=False, default=False, index=True)
+    alert_reason = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
 
 class AlertState(db.Model):
@@ -690,6 +711,8 @@ def write_audit_log(action, target, status="Success", details=None, status_code=
 AUDIT_EXCLUDED_PATHS = {
     "/honeypot-logs",
     "/api/logs",
+    "/api/external-logs",
+    "/api/external-logs/stats",
     "/api/dashboard/summary",
     "/api/ip-monitor",
     "/api/analysis",
@@ -840,6 +863,8 @@ REQUEST_LOG_EXCLUDED_PATHS = {
     "/favicon.ico",
     "/honeypot-logs",
     "/api/logs",
+    "/api/external-logs",
+    "/api/external-logs/stats",
     "/api/dashboard/summary",
     "/api/ip-monitor",
     "/api/analysis",
@@ -895,6 +920,74 @@ def classify_suspicious_request(capture):
 
     seen = set()
     return [item for item in matches if not (item in seen or seen.add(item))]
+
+
+EXTERNAL_ALERT_PATTERNS = (
+    ("SQLi", ("' or 1=1", " or 1=1", "union select", "drop table", "information_schema", "'--", "\"--")),
+    ("XSS", ("<script", "javascript:", "onerror=", "onload=", "alert(")),
+    ("RCE", (";wget ", ";curl ", "cmd=", "&&", "| bash", "/bin/sh", "powershell ")),
+)
+
+
+def parse_external_timestamp(value):
+    if not value:
+        return datetime.utcnow()
+    if isinstance(value, datetime):
+        return value
+    try:
+        parsed = datetime.fromisoformat(str(value).strip().replace("Z", "+00:00"))
+        if parsed.tzinfo is not None:
+            return parsed.astimezone().replace(tzinfo=None)
+        return parsed
+    except ValueError:
+        return datetime.utcnow()
+
+
+def serialise_external_log(log):
+    return {
+        "id": log.id,
+        "source": log.source,
+        "ip_address": log.ip_address,
+        "user_agent": log.user_agent or "",
+        "endpoint": log.endpoint,
+        "method": log.method,
+        "status": log.status,
+        "payload": log.payload or "",
+        "timestamp": log.timestamp.isoformat(),
+        "is_alert": log.is_alert,
+        "alert_reason": log.alert_reason or "",
+    }
+
+
+def detect_external_alert(ip_address, endpoint, status, payload, user_agent, event_ts):
+    searchable = " ".join([endpoint or "", payload or "", user_agent or "", status or ""]).lower()
+    reasons = []
+
+    for attack_type, tokens in EXTERNAL_ALERT_PATTERNS:
+        if any(token in searchable for token in tokens):
+            reasons.append(f"{attack_type} pattern detected")
+
+    is_login_path = "/login" in (endpoint or "").lower() or "/signin" in (endpoint or "").lower()
+    failed_status = (status or "").lower() in {"failed", "error", "denied", "blocked"}
+
+    if is_login_path and failed_status:
+        window_start = event_ts - timedelta(seconds=app.config["EXTERNAL_FAILED_LOGIN_WINDOW_SEC"])
+        failed_count = (
+            ExternalLog.query.filter(
+                ExternalLog.ip_address == ip_address,
+                ExternalLog.endpoint.ilike("%login%"),
+                ExternalLog.status.in_(["failed", "error", "denied", "blocked"]),
+                ExternalLog.timestamp >= window_start,
+            ).count()
+        )
+        if failed_count + 1 >= app.config["EXTERNAL_FAILED_LOGIN_THRESHOLD"]:
+            reasons.append(
+                f"Too many failed login attempts from same IP (>= {app.config['EXTERNAL_FAILED_LOGIN_THRESHOLD']})"
+            )
+
+    if not reasons:
+        return False, ""
+    return True, " | ".join(reasons)
 
 
 def should_log_suspicious_request(req, capture=None):
@@ -972,6 +1065,22 @@ def capture_suspicious_requests():
 @app.route("/")
 def index():
     return render_template("honeypot_homepage.html")
+
+
+@app.route("/script.js")
+def script_js():
+    return send_from_directory(os.path.join(app.root_path, "static"), "script.js")
+
+
+@app.route("/style.css")
+def style_css():
+    return send_from_directory(os.path.join(app.root_path, "static"), "style.css")
+
+
+@app.route("/static/<path:filename>")
+def static_files(filename):
+    return send_from_directory(os.path.join(app.root_path, "static"), filename)
+
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -1238,11 +1347,115 @@ def honeypot_logs():
     return jsonify([serialise_attack_log(log) for log in logs])
 
 
-@app.route("/api/logs")
-@login_required
+@app.route("/api/logs", methods=["GET", "POST"])
 def api_logs():
-    logs = AttackLog.query.order_by(AttackLog.timestamp.desc()).limit(500).all()
-    return jsonify([serialise_attack_log(log) for log in logs])
+    if request.method == "GET":
+        if "user_id" not in session:
+            return jsonify({"error": "Authentication required"}), 401
+        logs = AttackLog.query.order_by(AttackLog.timestamp.desc()).limit(500).all()
+        return jsonify([serialise_attack_log(log) for log in logs])
+
+    expected_api_key = app.config["LOG_API_KEY"]
+    received_api_key = request.headers.get("X-API-KEY", "").strip()
+    if not expected_api_key:
+        return jsonify({"error": "Ingestion API key is not configured on HoneyTrap"}), 503
+    if received_api_key != expected_api_key:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json(silent=True) or {}
+    endpoint = (data.get("endpoint") or data.get("url") or "").strip()
+    method = (data.get("method") or "GET").strip().upper()[:16]
+    status = (data.get("status") or "unknown").strip().lower()[:40]
+    ip_address = (data.get("ip") or data.get("ip_address") or request.remote_addr or "unknown").strip()
+    user_agent = (data.get("user_agent") or request.headers.get("User-Agent") or "").strip()[:512]
+    source = (data.get("source") or "dummy-site").strip()[:80]
+    payload = data.get("payload")
+
+    if isinstance(payload, (dict, list)):
+        payload = json.dumps(payload)
+    payload = (payload or "")[:2000]
+    event_ts = parse_external_timestamp(data.get("timestamp"))
+
+    if not endpoint:
+        return jsonify({"error": "Missing required field: endpoint"}), 400
+
+    is_alert, reason = detect_external_alert(
+        ip_address=ip_address,
+        endpoint=endpoint,
+        status=status,
+        payload=payload,
+        user_agent=user_agent,
+        event_ts=event_ts,
+    )
+
+    entry = ExternalLog(
+        source=source,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        endpoint=endpoint[:500],
+        method=method,
+        status=status,
+        payload=payload,
+        timestamp=event_ts,
+        is_alert=is_alert,
+        alert_reason=reason[:255] if reason else None,
+    )
+    db.session.add(entry)
+    db.session.commit()
+
+    return jsonify({"status": "ok", "id": entry.id, "is_alert": entry.is_alert, "alert_reason": entry.alert_reason}), 201
+
+
+@app.route("/api/external-logs")
+@login_required
+def external_logs_data():
+    ip_filter = request.args.get("ip", "").strip()
+    status_filter = request.args.get("status", "").strip().lower()
+    endpoint_filter = request.args.get("endpoint", "").strip()
+    alert_only = request.args.get("alert_only", "").strip().lower() in {"1", "true", "yes"}
+    limit = min(request.args.get("limit", 200, type=int), 1000)
+
+    query = ExternalLog.query
+    if ip_filter:
+        query = query.filter(ExternalLog.ip_address.contains(ip_filter))
+    if status_filter:
+        query = query.filter(ExternalLog.status == status_filter)
+    if endpoint_filter:
+        query = query.filter(ExternalLog.endpoint.contains(endpoint_filter))
+    if alert_only:
+        query = query.filter(ExternalLog.is_alert.is_(True))
+
+    logs = query.order_by(ExternalLog.timestamp.desc()).limit(limit).all()
+    return jsonify([serialise_external_log(log) for log in logs])
+
+
+@app.route("/api/external-logs/stats")
+@login_required
+def external_logs_stats():
+    minutes = max(1, min(request.args.get("minutes", 60, type=int), 720))
+    cutoff = datetime.utcnow() - timedelta(minutes=minutes)
+    logs = ExternalLog.query.filter(ExternalLog.timestamp >= cutoff).order_by(ExternalLog.timestamp.asc()).all()
+
+    per_minute_counter = Counter(log.timestamp.strftime("%H:%M") for log in logs)
+    labels = []
+    values = []
+    cursor = cutoff.replace(second=0, microsecond=0)
+    end = datetime.utcnow().replace(second=0, microsecond=0)
+    while cursor <= end:
+        key = cursor.strftime("%H:%M")
+        labels.append(key)
+        values.append(per_minute_counter.get(key, 0))
+        cursor += timedelta(minutes=1)
+
+    return jsonify(
+        {
+            "total": len(logs),
+            "alerts": sum(1 for log in logs if log.is_alert),
+            "failed": sum(1 for log in logs if log.status in {"failed", "error", "denied", "blocked"}),
+            "labels": labels,
+            "values": values,
+        }
+    )
 
 
 @app.route("/api/dashboard/summary")
