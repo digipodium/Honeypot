@@ -2246,3 +2246,6 @@ smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepte
 2026-04-21 17:35:24,773 - 127.0.0.1 - - [21/Apr/2026 17:35:24] "[32mPOST /login HTTP/1.1[0m" 302 -
 2026-04-21 17:35:25,060 - 127.0.0.1 - - [21/Apr/2026 17:35:25] "GET /login HTTP/1.1" 200 -
 2026-04-21 17:48:02,710 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\app.py', reloading
+2026-04-21 17:48:03,535 -  * Restarting with stat
+2026-04-21 17:48:05,171 -  * Debugger is active!
+2026-04-21 17:48:05,179 -  * Debugger PIN: 143-866-343
