@@ -1,6 +1,8 @@
 import os
 import logging
 import json
+import time
+from collections import defaultdict
 from flask import Flask, redirect, render_template, request, url_for
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -26,15 +28,29 @@ logging.basicConfig(
     ]
 )
 
+# IP Tracking for brute-force detection
+MAX_LOGIN_ATTEMPTS = 5
+LOGIN_ATTEMPTS = defaultdict(int)
+FLAGGED_IPS = set()
+
 # Lists of suspicious patterns
 SUSPICIOUS_PATHS = [
     '/.env', '/wp-admin', '/config', '/.git', '/etc/passwd', 
-    '/admin', '/db', '/backup', '/shell.php', '/eval-stdin.php'
+    '/admin', '/db', '/backup', '/shell.php', '/eval-stdin.php',
+    '/api/v1/auth', '/config.php', '/.aws/credentials'
 ]
 
 SUSPICIOUS_KEYWORDS = [
-    'union select', 'or 1=1', '<script', 'wget', 'curl', '../', 'drop table', 'truncate'
+    'union select', 'or 1=1', '<script', 'wget', 'curl', '../', 'drop table', 'truncate',
+    'id', 'whoami', 'cat /etc', 'powershell', 'cmd.exe', 'base64', 'exec(', 'system(',
+    'eval(', 'alert(', 'javascript:', 'onerror='
 ]
+
+def get_remote_ip():
+    """Returns the real client IP, even if behind a proxy like Render."""
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    return request.remote_addr
 
 @app.before_request
 def check_for_attacks():
@@ -44,10 +60,19 @@ def check_for_attacks():
     """
     path = request.path
     query = request.query_string.decode('utf-8').lower()
+    ip = get_remote_ip()
     
     # Skip detection for health check and static assets if any
     if path == '/health' or path.startswith('/static'):
         return None
+
+    # Check if this IP is already flagged/banned
+    if ip in FLAGGED_IPS:
+        logging.info(f"FLAGGED IP DETECTED - Automatically redirecting {ip} (Target: {path})")
+        target = f"{HONEYPOT_URL}/{path.lstrip('/')}"
+        if query:
+            target += f"?{query}"
+        return redirect(target, code=302)
 
     is_suspicious = False
     reason = ""
@@ -78,7 +103,7 @@ def check_for_attacks():
         if query:
             target += f"?{query}"
             
-        logging.warning(f"SECURITY ALERT - REDIRECTING [{reason}]. Source IP: {request.remote_addr}")
+        logging.warning(f"SECURITY ALERT - REDIRECTING [{reason}]. Source IP: {ip}")
         return redirect(target, code=302)
 
 # --- PUBLIC ROUTES (The Facade) ---
@@ -106,10 +131,34 @@ def contact():
         return render_template('contact.html', success=True)
     return render_template('contact.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    """Fake Login Page Lure"""
-    return "Login Service Temporarily Unavailable", 503
+    """Fake Login Page Lure with Brute-Force Monitoring"""
+    ip = get_remote_ip()
+    
+    if request.method == 'POST':
+        # Every POST to login is considered a "failed attempt" since this is a lure
+        LOGIN_ATTEMPTS[ip] += 1
+        count = LOGIN_ATTEMPTS[ip]
+        
+        username = request.form.get('username', 'unknown')
+        logging.info(f"LOGIN ATTEMPT [{count}/{MAX_LOGIN_ATTEMPTS}] - IP: {ip}, User: {username}")
+        
+        if count >= MAX_LOGIN_ATTEMPTS:
+            FLAGGED_IPS.add(ip)
+            logging.warning(f"BRUTE FORCE DETECTED - FLAGGING IP: {ip}")
+            
+            # Redirect to honeypot immediately on the threshold-breaking request
+            # We append the original path or /login
+            target = f"{HONEYPOT_URL}/login"
+            return redirect(target, code=302)
+            
+        # Return the login page with an error to encourage more attempts
+        # Small delay to simulate "processing" and rate limiting
+        time.sleep(1)
+        return render_template('login.html', error=True)
+
+    return render_template('login.html')
 
 @app.route('/debug-console')
 def debug_console():

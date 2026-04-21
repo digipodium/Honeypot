@@ -1843,3 +1843,41 @@ smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepte
 2026-04-19 16:23:00,646 - 127.0.0.1 - - [19/Apr/2026 16:23:00] "GET / HTTP/1.1" 200 -
 2026-04-19 16:23:06,150 - 127.0.0.1 - - [19/Apr/2026 16:23:06] "GET /login HTTP/1.1" 200 -
 2026-04-19 16:23:20,645 - 127.0.0.1 - - [19/Apr/2026 16:23:20] "GET /login HTTP/1.1" 200 -
+2026-04-21 14:08:54,976 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-04-21 14:08:54,976 - [33mPress CTRL+C to quit[0m
+2026-04-21 14:08:54,994 -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:08:56,196 -  * Debugger is active!
+2026-04-21 14:08:56,201 -  * Debugger PIN: 925-345-474
+2026-04-21 14:08:58,629 - 127.0.0.1 - - [21/Apr/2026 14:08:58] "[33mGET /socket.io/?EIO=4&transport=polling&t=dgvt4111 HTTP/1.1[0m" 404 -
+2026-04-21 14:09:43,092 - 127.0.0.1 - - [21/Apr/2026 14:09:43] "GET / HTTP/1.1" 200 -
+2026-04-21 14:10:24,171 - 127.0.0.1 - - [21/Apr/2026 14:10:24] "GET /login HTTP/1.1" 200 -
+2026-04-21 14:11:05,711 - {"time": "2026-04-21T08:41:05.669003", "ip": "127.0.0.1", "method": "POST", "path": "/register", "body": "body=name=mmm+m&email=mmm%40mail.com&password=%40Abc1234&confirm_password=%40Abc1234", "headers": {"Origin": "http://127.0.0.1:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36", "Referer": "http://127.0.0.1:5000/login"}, "note": "suspicious_request"}
+2026-04-21 14:11:06,044 - 127.0.0.1 - - [21/Apr/2026 14:11:06] "[32mPOST /register HTTP/1.1[0m" 302 -
+2026-04-21 14:11:06,049 - 127.0.0.1 - - [21/Apr/2026 14:11:06] "GET /login HTTP/1.1" 200 -
+2026-04-21 14:11:31,880 - {"time": "2026-04-21T08:41:31.839590", "ip": "127.0.0.1", "method": "POST", "path": "/login", "body": "body=email=mmm&password=%40Abc1234", "headers": {"Origin": "http://127.0.0.1:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36", "Referer": "http://127.0.0.1:5000/login"}, "note": "suspicious_request"}
+2026-04-21 14:11:31,897 - 127.0.0.1 - - [21/Apr/2026 14:11:31] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 14:11:31,904 - 127.0.0.1 - - [21/Apr/2026 14:11:31] "GET /login HTTP/1.1" 200 -
+2026-04-21 14:11:46,619 - {"time": "2026-04-21T08:41:46.580346", "ip": "127.0.0.1", "method": "POST", "path": "/login", "body": "body=email=mmm%40mail.com&password=%40Abc1234", "headers": {"Origin": "http://127.0.0.1:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36", "Referer": "http://127.0.0.1:5000/login"}, "note": "suspicious_request"}
+2026-04-21 14:11:46,950 - 127.0.0.1 - - [21/Apr/2026 14:11:46] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 14:11:47,061 - 127.0.0.1 - - [21/Apr/2026 14:11:47] "GET /dashboard HTTP/1.1" 200 -
+2026-04-21 14:11:47,194 - 127.0.0.1 - - [21/Apr/2026 14:11:47] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 14:11:50,010 - 127.0.0.1 - - [21/Apr/2026 14:11:50] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 14:11:50,036 - 127.0.0.1 - - [21/Apr/2026 14:11:50] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 14:19:34,642 -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading
+2026-04-21 14:19:35,174 -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:19:36,576 -  * Debugger is active!
+2026-04-21 14:19:36,581 -  * Debugger PIN: 925-345-474
+2026-04-21 14:19:44,462 -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading
+2026-04-21 14:19:44,759 -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:19:46,116 -  * Debugger is active!
+2026-04-21 14:19:46,121 -  * Debugger PIN: 925-345-474
+2026-04-21 14:20:07,180 -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading
+2026-04-21 14:20:07,587 -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:20:08,941 -  * Debugger is active!
+2026-04-21 14:20:08,946 -  * Debugger PIN: 925-345-474
+2026-04-21 14:20:28,242 -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\test_redirection.py', reloading
+2026-04-21 14:20:28,588 -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:20:29,903 -  * Debugger is active!
+2026-04-21 14:20:29,908 -  * Debugger PIN: 925-345-474
+2026-04-21 14:21:17,256 -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\test_redirection.py', reloading

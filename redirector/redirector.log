@@ -27,3 +27,32 @@
 2026-04-21 00:00:58,654 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:58] "GET /products?id=309 HTTP/1.1" 200 -
 2026-04-21 00:00:59,978 - INFO - 127.0.0.1 - - [21/Apr/2026 00:00:59] "GET /products?id=205 HTTP/1.1" 200 -
 2026-04-21 00:01:01,077 - INFO - 127.0.0.1 - - [21/Apr/2026 00:01:01] "GET /products?id=101 HTTP/1.1" 200 -
+2026-04-21 14:20:35,959 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:20:36,027 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.18.61:5001
+2026-04-21 14:20:36,028 - INFO - [33mPress CTRL+C to quit[0m
+2026-04-21 14:20:36,052 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:20:36,574 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:20:36,605 - WARNING -  * Debugger is active!
+2026-04-21 14:20:36,609 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:20:43,741 - INFO - LOGIN ATTEMPT [1/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:20:44,747 - INFO - 127.0.0.1 - - [21/Apr/2026 14:20:44] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:20:47,292 - INFO - LOGIN ATTEMPT [2/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:20:48,293 - INFO - 127.0.0.1 - - [21/Apr/2026 14:20:48] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:20:50,828 - INFO - LOGIN ATTEMPT [3/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:20:51,829 - INFO - 127.0.0.1 - - [21/Apr/2026 14:20:51] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:20:54,372 - INFO - LOGIN ATTEMPT [4/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:20:55,373 - INFO - 127.0.0.1 - - [21/Apr/2026 14:20:55] "POST /login HTTP/1.1" 200 -
+2026-04-21 14:20:57,910 - INFO - LOGIN ATTEMPT [5/5] - IP: 127.0.0.1, User: admin
+2026-04-21 14:20:57,910 - WARNING - BRUTE FORCE DETECTED - FLAGGING IP: 127.0.0.1
+2026-04-21 14:20:57,911 - INFO - 127.0.0.1 - - [21/Apr/2026 14:20:57] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 14:21:00,434 - INFO - FLAGGED IP DETECTED - Automatically redirecting 127.0.0.1 (Target: /login)
+2026-04-21 14:21:00,434 - INFO - 127.0.0.1 - - [21/Apr/2026 14:21:00] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 14:21:02,995 - INFO - FLAGGED IP DETECTED - Automatically redirecting 127.0.0.1 (Target: /)
+2026-04-21 14:21:02,995 - INFO - 127.0.0.1 - - [21/Apr/2026 14:21:02] "[32mGET /?q='%20or%201=1%20-- HTTP/1.1[0m" 302 -
+2026-04-21 14:21:05,025 - INFO - FLAGGED IP DETECTED - Automatically redirecting 127.0.0.1 (Target: /)
+2026-04-21 14:21:05,026 - INFO - 127.0.0.1 - - [21/Apr/2026 14:21:05] "[32mGET /?q=<script>alert(1)</script> HTTP/1.1[0m" 302 -
+2026-04-21 14:21:07,061 - INFO - FLAGGED IP DETECTED - Automatically redirecting 127.0.0.1 (Target: /)
+2026-04-21 14:21:07,061 - INFO - 127.0.0.1 - - [21/Apr/2026 14:21:07] "[32mGET /?q=cat%20/etc/passwd HTTP/1.1[0m" 302 -
