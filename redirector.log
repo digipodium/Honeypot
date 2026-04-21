@@ -1,0 +1,88 @@
+2026-04-21 14:32:27,492 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:32:27,547 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.18.61:5001
+2026-04-21 14:32:27,547 - INFO - [33mPress CTRL+C to quit[0m
+2026-04-21 14:32:27,566 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:32:28,240 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:32:28,274 - WARNING -  * Debugger is active!
+2026-04-21 14:32:28,281 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:32:47,941 - WARNING - SECURITY ALERT - REDIRECTING [Attack Payload in Form Field 'message': ' OR 1=1 --]. Source IP: 127.0.0.1
+2026-04-21 14:32:47,942 - INFO - 127.0.0.1 - - [21/Apr/2026 14:32:47] "[32mPOST /contact HTTP/1.1[0m" 302 -
+2026-04-21 14:34:59,669 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:34:59,728 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.18.61:5001
+2026-04-21 14:34:59,728 - INFO - [33mPress CTRL+C to quit[0m
+2026-04-21 14:34:59,746 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:35:00,425 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:35:00,457 - WARNING -  * Debugger is active!
+2026-04-21 14:35:00,461 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:35:09,641 - WARNING - SECURITY ALERT - REDIRECTING [Attack Payload in Form Field 'message': ' OR 1=1 --]. Source IP: 127.0.0.1
+2026-04-21 14:35:09,642 - INFO - 127.0.0.1 - - [21/Apr/2026 14:35:09] "[32mPOST /contact HTTP/1.1[0m" 302 -
+2026-04-21 14:35:32,180 - INFO -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading
+2026-04-21 14:35:32,338 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:35:33,090 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:35:33,128 - WARNING -  * Debugger is active!
+2026-04-21 14:35:33,136 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:35:45,418 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:35:45,456 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.18.61:5001
+2026-04-21 14:35:45,456 - INFO - [33mPress CTRL+C to quit[0m
+2026-04-21 14:35:45,468 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:35:45,943 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:35:45,964 - WARNING -  * Debugger is active!
+2026-04-21 14:35:45,968 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:35:55,638 - WARNING - SECURITY ALERT - REDIRECTING [Attack Payload in Form Field 'message': ' OR 1=1 --]. Source IP: 127.0.0.1
+2026-04-21 14:35:55,639 - INFO - 127.0.0.1 - - [21/Apr/2026 14:35:55] "[32mPOST /contact HTTP/1.1[0m" 302 -
+2026-04-21 14:36:19,293 - INFO -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading
+2026-04-21 14:36:19,523 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:36:20,256 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:36:20,306 - WARNING -  * Debugger is active!
+2026-04-21 14:36:20,312 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:36:33,054 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:36:33,109 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.18.61:5001
+2026-04-21 14:36:33,109 - INFO - [33mPress CTRL+C to quit[0m
+2026-04-21 14:36:33,125 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:36:33,813 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:36:33,845 - WARNING -  * Debugger is active!
+2026-04-21 14:36:33,852 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:36:44,884 - WARNING - SECURITY ALERT - REDIRECTING [Attack Payload in Form Field 'message': ' OR 1=1 --]. Source IP: 127.0.0.1
+2026-04-21 14:36:44,885 - INFO - 127.0.0.1 - - [21/Apr/2026 14:36:44] "[32mPOST /contact HTTP/1.1[0m" 302 -
+2026-04-21 14:37:07,874 - INFO -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading
+2026-04-21 14:37:08,013 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:37:08,758 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:37:08,795 - WARNING -  * Debugger is active!
+2026-04-21 14:37:08,802 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:44:22,722 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:44:22,776 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.18.61:5001
+2026-04-21 14:44:22,777 - INFO - [33mPress CTRL+C to quit[0m
+2026-04-21 14:44:22,795 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:44:23,462 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:44:23,498 - WARNING -  * Debugger is active!
+2026-04-21 14:44:23,504 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:45:25,597 - INFO -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading
+2026-04-21 14:45:25,774 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:45:26,574 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:45:26,611 - WARNING -  * Debugger is active!
+2026-04-21 14:45:26,617 - INFO -  * Debugger PIN: 925-345-474
+2026-04-21 14:45:42,499 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:45:42,555 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.18.61:5001
+2026-04-21 14:45:42,555 - INFO - [33mPress CTRL+C to quit[0m
+2026-04-21 14:45:42,571 - INFO -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:45:43,279 - INFO - Nova-Tech Portal (DEV) starting on http://localhost:5001
+2026-04-21 14:45:43,311 - WARNING -  * Debugger is active!
+2026-04-21 14:45:43,317 - INFO -  * Debugger PIN: 925-345-474

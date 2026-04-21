@@ -2063,3 +2063,185 @@ smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepte
 2026-04-21 14:28:53,382 - 127.0.0.1 - - [21/Apr/2026 14:28:53] "GET /honeypot-logs HTTP/1.1" 200 -
 2026-04-21 14:28:55,490 - 127.0.0.1 - - [21/Apr/2026 14:28:55] "GET /attacklogs HTTP/1.1" 200 -
 2026-04-21 14:28:55,506 - 127.0.0.1 - - [21/Apr/2026 14:28:55] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 14:52:00,994 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\redirector\\redirector.py', reloading
+2026-04-21 14:52:01,169 -  * Restarting with stat
+2026-04-21 14:52:02,015 -  * Debugger is active!
+2026-04-21 14:52:02,018 -  * Debugger PIN: 143-866-343
+2026-04-21 15:00:47,985 - 127.0.0.1 - - [21/Apr/2026 15:00:47] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 15:00:48,005 - 127.0.0.1 - - [21/Apr/2026 15:00:48] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 15:18:41,052 - 127.0.0.1 - - [21/Apr/2026 15:18:41] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 15:18:41,064 - 127.0.0.1 - - [21/Apr/2026 15:18:41] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 15:40:40,257 - 127.0.0.1 - - [21/Apr/2026 15:40:40] "GET /dashboard HTTP/1.1" 200 -
+2026-04-21 15:40:42,125 - 127.0.0.1 - - [21/Apr/2026 15:40:42] "GET /login HTTP/1.1" 200 -
+2026-04-21 15:45:17,262 - {"time": "2026-04-21T10:15:17.249910", "ip": "127.0.0.1", "method": "POST", "path": "/login", "body": "body=email=thanksweretogether2024%40gmail.com&password=Arpita%40iq2004", "headers": {"Origin": "http://127.0.0.1:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0", "Referer": "http://127.0.0.1:5000/login"}, "note": "suspicious_request"}
+2026-04-21 15:45:17,449 - 127.0.0.1 - - [21/Apr/2026 15:45:17] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 15:45:17,465 - 127.0.0.1 - - [21/Apr/2026 15:45:17] "GET /dashboard HTTP/1.1" 200 -
+2026-04-21 15:45:17,497 - 127.0.0.1 - - [21/Apr/2026 15:45:17] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:45:27,512 - 127.0.0.1 - - [21/Apr/2026 15:45:27] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:45:37,504 - 127.0.0.1 - - [21/Apr/2026 15:45:37] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:45:47,511 - 127.0.0.1 - - [21/Apr/2026 15:45:47] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:45:57,502 - 127.0.0.1 - - [21/Apr/2026 15:45:57] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:46:07,509 - 127.0.0.1 - - [21/Apr/2026 15:46:07] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:46:09,404 - 127.0.0.1 - - [21/Apr/2026 15:46:09] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 15:46:09,436 - 127.0.0.1 - - [21/Apr/2026 15:46:09] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 15:47:16,389 - 127.0.0.1 - - [21/Apr/2026 15:47:16] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:47:17,502 - 127.0.0.1 - - [21/Apr/2026 15:47:17] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:47:17,969 - 127.0.0.1 - - [21/Apr/2026 15:47:17] "GET /IPmonitor HTTP/1.1" 200 -
+2026-04-21 15:47:17,986 - 127.0.0.1 - - [21/Apr/2026 15:47:17] "GET /api/ip-monitor HTTP/1.1" 200 -
+2026-04-21 15:48:45,309 - 127.0.0.1 - - [21/Apr/2026 15:48:45] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:48:47,512 - 127.0.0.1 - - [21/Apr/2026 15:48:47] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:48:47,869 - 127.0.0.1 - - [21/Apr/2026 15:48:47] "GET /IPmonitor HTTP/1.1" 200 -
+2026-04-21 15:48:47,885 - 127.0.0.1 - - [21/Apr/2026 15:48:47] "GET /api/ip-monitor HTTP/1.1" 200 -
+2026-04-21 15:48:51,995 - 127.0.0.1 - - [21/Apr/2026 15:48:51] "GET /analysis HTTP/1.1" 200 -
+2026-04-21 15:48:52,024 - 127.0.0.1 - - [21/Apr/2026 15:48:52] "GET /api/analysis?hours=24 HTTP/1.1" 200 -
+2026-04-21 15:49:11,150 - 127.0.0.1 - - [21/Apr/2026 15:49:11] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:49:14,277 - 127.0.0.1 - - [21/Apr/2026 15:49:14] "GET /alerts HTTP/1.1" 200 -
+2026-04-21 15:49:14,296 - 127.0.0.1 - - [21/Apr/2026 15:49:14] "GET /api/alerts HTTP/1.1" 200 -
+2026-04-21 15:49:24,299 - 127.0.0.1 - - [21/Apr/2026 15:49:24] "GET /api/alerts HTTP/1.1" 200 -
+2026-04-21 15:49:34,309 - 127.0.0.1 - - [21/Apr/2026 15:49:34] "GET /api/alerts HTTP/1.1" 200 -
+2026-04-21 15:49:44,310 - 127.0.0.1 - - [21/Apr/2026 15:49:44] "GET /api/alerts HTTP/1.1" 200 -
+2026-04-21 15:49:54,301 - 127.0.0.1 - - [21/Apr/2026 15:49:54] "GET /api/alerts HTTP/1.1" 200 -
+2026-04-21 15:49:59,423 - 127.0.0.1 - - [21/Apr/2026 15:49:59] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:50:01,647 - 127.0.0.1 - - [21/Apr/2026 15:50:01] "GET /settings HTTP/1.1" 200 -
+2026-04-21 15:50:01,670 - 127.0.0.1 - - [21/Apr/2026 15:50:01] "GET /api/audit-logs?limit=50 HTTP/1.1" 200 -
+2026-04-21 15:50:22,942 - 127.0.0.1 - - [21/Apr/2026 15:50:22] "GET /dashboard HTTP/1.1" 200 -
+2026-04-21 15:50:22,962 - 127.0.0.1 - - [21/Apr/2026 15:50:22] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:50:32,967 - 127.0.0.1 - - [21/Apr/2026 15:50:32] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:50:42,976 - 127.0.0.1 - - [21/Apr/2026 15:50:42] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:50:52,965 - 127.0.0.1 - - [21/Apr/2026 15:50:52] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:51:02,974 - 127.0.0.1 - - [21/Apr/2026 15:51:02] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:51:12,981 - 127.0.0.1 - - [21/Apr/2026 15:51:12] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:51:17,054 - 127.0.0.1 - - [21/Apr/2026 15:51:17] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:51:18,284 - 127.0.0.1 - - [21/Apr/2026 15:51:18] "GET /login HTTP/1.1" 200 -
+2026-04-21 15:51:30,381 - {"time": "2026-04-21T10:21:30.372853", "ip": "127.0.0.1", "method": "POST", "path": "/login", "body": "body=email=thanksweretogether2024%40gmail.com&password=hbfsefdtywhdskas", "headers": {"Origin": "http://127.0.0.1:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0", "Referer": "http://127.0.0.1:5000/login"}, "note": "suspicious_request"}
+2026-04-21 15:51:30,534 - 127.0.0.1 - - [21/Apr/2026 15:51:30] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 15:51:30,539 - 127.0.0.1 - - [21/Apr/2026 15:51:30] "GET /login HTTP/1.1" 200 -
+2026-04-21 15:51:51,443 - {"time": "2026-04-21T10:21:51.434206", "ip": "127.0.0.1", "method": "POST", "path": "/login", "body": "body=email=thanksweretogether2024%40gmail.com&password=Arpita%40iq2004", "headers": {"Origin": "http://127.0.0.1:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0", "Referer": "http://127.0.0.1:5000/login"}, "note": "suspicious_request"}
+2026-04-21 15:51:51,600 - 127.0.0.1 - - [21/Apr/2026 15:51:51] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 15:51:51,614 - 127.0.0.1 - - [21/Apr/2026 15:51:51] "GET /dashboard HTTP/1.1" 200 -
+2026-04-21 15:51:51,637 - 127.0.0.1 - - [21/Apr/2026 15:51:51] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:52:01,654 - 127.0.0.1 - - [21/Apr/2026 15:52:01] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:52:11,645 - 127.0.0.1 - - [21/Apr/2026 15:52:11] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:52:21,802 - 127.0.0.1 - - [21/Apr/2026 15:52:21] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:52:31,807 - 127.0.0.1 - - [21/Apr/2026 15:52:31] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:52:41,814 - 127.0.0.1 - - [21/Apr/2026 15:52:41] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:52:51,807 - 127.0.0.1 - - [21/Apr/2026 15:52:51] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:53:01,812 - 127.0.0.1 - - [21/Apr/2026 15:53:01] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:53:11,805 - 127.0.0.1 - - [21/Apr/2026 15:53:11] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:53:21,811 - 127.0.0.1 - - [21/Apr/2026 15:53:21] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:53:43,809 - 127.0.0.1 - - [21/Apr/2026 15:53:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:54:43,805 - 127.0.0.1 - - [21/Apr/2026 15:54:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:55:43,820 - 127.0.0.1 - - [21/Apr/2026 15:55:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:56:43,812 - 127.0.0.1 - - [21/Apr/2026 15:56:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:57:43,809 - 127.0.0.1 - - [21/Apr/2026 15:57:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:07:38,808 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\app.py', reloading
+2026-04-21 16:07:39,315 -  * Restarting with stat
+2026-04-21 16:07:40,521 -  * Debugger is active!
+2026-04-21 16:07:40,525 -  * Debugger PIN: 143-866-343
+2026-04-21 16:13:17,273 - 127.0.0.1 - - [21/Apr/2026 16:13:17] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:13:18,945 - 127.0.0.1 - - [21/Apr/2026 16:13:18] "GET /dashboard HTTP/1.1" 200 -
+2026-04-21 16:13:18,999 - 127.0.0.1 - - [21/Apr/2026 16:13:18] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:13:24,867 - 127.0.0.1 - - [21/Apr/2026 16:13:24] "GET /login HTTP/1.1" 200 -
+2026-04-21 16:13:37,440 - {"time": "2026-04-21T10:43:37.414536", "ip": "127.0.0.1", "method": "POST", "path": "/login", "body": "body=email=aanbhgdsgfdhxz&password=zxkjnchegsfe", "headers": {"Origin": "http://127.0.0.1:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0", "Referer": "http://127.0.0.1:5000/login"}, "note": "suspicious_request"}
+2026-04-21 16:13:37,475 - 127.0.0.1 - - [21/Apr/2026 16:13:37] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 16:13:37,484 - 127.0.0.1 - - [21/Apr/2026 16:13:37] "GET /login HTTP/1.1" 200 -
+2026-04-21 16:13:40,079 - {"time": "2026-04-21T10:43:40.060045", "ip": "127.0.0.1", "method": "POST", "path": "/login", "body": "body=email=thanksweretogether2024%40gmail.com&password=Arpita%40iq2004", "headers": {"Origin": "http://127.0.0.1:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0", "Referer": "http://127.0.0.1:5000/login"}, "note": "suspicious_request"}
+2026-04-21 16:13:40,254 - 127.0.0.1 - - [21/Apr/2026 16:13:40] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 16:13:40,267 - 127.0.0.1 - - [21/Apr/2026 16:13:40] "GET /dashboard HTTP/1.1" 200 -
+2026-04-21 16:13:40,292 - 127.0.0.1 - - [21/Apr/2026 16:13:40] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:13:50,296 - 127.0.0.1 - - [21/Apr/2026 16:13:50] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:14:00,293 - 127.0.0.1 - - [21/Apr/2026 16:14:00] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:14:10,821 - 127.0.0.1 - - [21/Apr/2026 16:14:10] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:14:20,820 - 127.0.0.1 - - [21/Apr/2026 16:14:20] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:14:30,815 - 127.0.0.1 - - [21/Apr/2026 16:14:30] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:14:40,806 - 127.0.0.1 - - [21/Apr/2026 16:14:40] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:14:50,817 - 127.0.0.1 - - [21/Apr/2026 16:14:50] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:15:00,811 - 127.0.0.1 - - [21/Apr/2026 16:15:00] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:15:43,816 - 127.0.0.1 - - [21/Apr/2026 16:15:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:16:43,820 - 127.0.0.1 - - [21/Apr/2026 16:16:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:17:15,015 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\app.py', reloading
+2026-04-21 16:17:15,283 -  * Restarting with stat
+2026-04-21 16:17:16,253 -  * Debugger is active!
+2026-04-21 16:17:16,255 -  * Debugger PIN: 143-866-343
+2026-04-21 16:17:43,821 - 127.0.0.1 - - [21/Apr/2026 16:17:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:18:43,807 - 127.0.0.1 - - [21/Apr/2026 16:18:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:19:43,807 - 127.0.0.1 - - [21/Apr/2026 16:19:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:20:43,833 - 127.0.0.1 - - [21/Apr/2026 16:20:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:21:43,808 - 127.0.0.1 - - [21/Apr/2026 16:21:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:22:43,808 - 127.0.0.1 - - [21/Apr/2026 16:22:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:26:05,615 - 127.0.0.1 - - [21/Apr/2026 16:26:05] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:26:43,823 - 127.0.0.1 - - [21/Apr/2026 16:26:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:27:43,809 - 127.0.0.1 - - [21/Apr/2026 16:27:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:28:43,803 - 127.0.0.1 - - [21/Apr/2026 16:28:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:29:43,827 - 127.0.0.1 - - [21/Apr/2026 16:29:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:30:43,813 - 127.0.0.1 - - [21/Apr/2026 16:30:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:31:43,805 - 127.0.0.1 - - [21/Apr/2026 16:31:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 16:32:24,575 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\app.py', reloading
+2026-04-21 16:32:24,724 -  * Restarting with stat
+2026-04-21 16:32:25,375 -  * Debugger is active!
+2026-04-21 16:32:25,377 -  * Debugger PIN: 143-866-343
+2026-04-21 16:32:43,819 - 127.0.0.1 - - [21/Apr/2026 16:32:43] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 17:05:06,188 - {"time": "2026-04-21T11:35:06.145383", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/admin", "body": "", "headers": {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"}}
+2026-04-21 17:05:07,093 - 127.0.0.1 - - [21/Apr/2026 17:05:07] "GET /honeypot/admin HTTP/1.1" 200 -
+2026-04-21 17:05:07,159 - 127.0.0.1 - - [21/Apr/2026 17:05:07] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-21 17:05:09,823 - {"time": "2026-04-21T11:35:09.814848", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/wp-admin", "body": "", "headers": {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"}}
+2026-04-21 17:05:10,647 - 127.0.0.1 - - [21/Apr/2026 17:05:10] "GET /honeypot/wp-admin HTTP/1.1" 200 -
+2026-04-21 17:05:13,055 - {"time": "2026-04-21T11:35:13.046806", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/.env", "body": "", "headers": {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"}}
+2026-04-21 17:05:14,031 - 127.0.0.1 - - [21/Apr/2026 17:05:14] "GET /honeypot/.env HTTP/1.1" 200 -
+2026-04-21 17:06:06,630 - {"time": "2026-04-21T11:36:06.618597", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/login", "body": "", "headers": {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"}}
+2026-04-21 17:06:07,468 - 127.0.0.1 - - [21/Apr/2026 17:06:07] "GET /honeypot/login HTTP/1.1" 200 -
+2026-04-21 17:22:27,418 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\simulate_attacks.py', reloading
+2026-04-21 17:22:28,291 -  * Restarting with stat
+2026-04-21 17:22:30,048 -  * Debugger is active!
+2026-04-21 17:22:30,057 -  * Debugger PIN: 143-866-343
+2026-04-21 17:28:09,140 - 127.0.0.1 - - [21/Apr/2026 17:28:09] "GET / HTTP/1.1" 200 -
+2026-04-21 17:28:11,517 - 127.0.0.1 - - [21/Apr/2026 17:28:11] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:28:14,385 - 127.0.0.1 - - [21/Apr/2026 17:28:14] "[32mGET /logs HTTP/1.1[0m" 302 -
+2026-04-21 17:28:14,406 - 127.0.0.1 - - [21/Apr/2026 17:28:14] "GET /login HTTP/1.1" 200 -
+2026-04-21 17:28:14,543 - {"time": "2026-04-21T11:58:14.534736", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/wp-admin", "body": "", "headers": {"User-Agent": "WPScan/3.8"}}
+2026-04-21 17:28:14,955 - 127.0.0.1 - - [21/Apr/2026 17:28:14] "GET /honeypot/wp-admin HTTP/1.1" 200 -
+2026-04-21 17:28:16,990 - 127.0.0.1 - - [21/Apr/2026 17:28:16] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:28:19,973 - {"time": "2026-04-21T11:58:19.964089", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/.env", "body": "", "headers": {"User-Agent": "curl/7.68.0"}}
+2026-04-21 17:28:21,133 - 127.0.0.1 - - [21/Apr/2026 17:28:21] "GET /honeypot/.env HTTP/1.1" 200 -
+2026-04-21 17:28:23,186 - 127.0.0.1 - - [21/Apr/2026 17:28:23] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:28:25,951 - 127.0.0.1 - - [21/Apr/2026 17:28:25] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:28:29,398 - {"time": "2026-04-21T11:58:29.386709", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/config", "body": "", "headers": {"User-Agent": "curl/7.68.0"}}
+2026-04-21 17:28:30,586 - 127.0.0.1 - - [21/Apr/2026 17:28:30] "GET /honeypot/config HTTP/1.1" 200 -
+2026-04-21 17:28:32,626 - 127.0.0.1 - - [21/Apr/2026 17:28:32] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:28:35,606 - {"time": "2026-04-21T11:58:35.598822", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/backup", "body": "", "headers": {"User-Agent": "dirbuster/1.0"}}
+2026-04-21 17:28:36,593 - 127.0.0.1 - - [21/Apr/2026 17:28:36] "GET /honeypot/backup HTTP/1.1" 200 -
+2026-04-21 17:28:38,641 - 127.0.0.1 - - [21/Apr/2026 17:28:38] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:28:41,615 - 127.0.0.1 - - [21/Apr/2026 17:28:41] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:28:45,055 - 127.0.0.1 - - [21/Apr/2026 17:28:45] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:28:47,861 - 127.0.0.1 - - [21/Apr/2026 17:28:47] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:28:50,924 - {"time": "2026-04-21T11:58:50.867318", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/search", "body": "", "headers": {"User-Agent": "Mozilla/5.0"}}
+2026-04-21 17:28:52,080 - 127.0.0.1 - - [21/Apr/2026 17:28:52] "GET /honeypot/search?q=<script>alert('xss')</script> HTTP/1.1" 200 -
+2026-04-21 17:28:54,109 - 127.0.0.1 - - [21/Apr/2026 17:28:54] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:28:57,171 - {"time": "2026-04-21T11:58:57.110115", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/search", "body": "", "headers": {"User-Agent": "Mozilla/5.0"}}
+2026-04-21 17:28:57,576 - 127.0.0.1 - - [21/Apr/2026 17:28:57] "GET /honeypot/search?q=<img+src=x+onerror=alert(1)> HTTP/1.1" 200 -
+2026-04-21 17:28:59,704 - 127.0.0.1 - - [21/Apr/2026 17:28:59] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:29:02,700 - 127.0.0.1 - - [21/Apr/2026 17:29:02] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:29:05,815 - 127.0.0.1 - - [21/Apr/2026 17:29:05] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:29:08,791 - {"time": "2026-04-21T11:59:08.784941", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/download", "body": "", "headers": {"User-Agent": "Mozilla/5.0"}}
+2026-04-21 17:29:09,380 - 127.0.0.1 - - [21/Apr/2026 17:29:09] "GET /honeypot/download?file=../../etc/passwd HTTP/1.1" 200 -
+2026-04-21 17:29:11,444 - 127.0.0.1 - - [21/Apr/2026 17:29:11] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:29:14,418 - {"time": "2026-04-21T11:59:14.410788", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/view", "body": "", "headers": {"User-Agent": "Mozilla/5.0"}}
+2026-04-21 17:29:15,141 - 127.0.0.1 - - [21/Apr/2026 17:29:15] "GET /honeypot/view?path=../../../../etc/shadow HTTP/1.1" 200 -
+2026-04-21 17:29:17,224 - 127.0.0.1 - - [21/Apr/2026 17:29:17] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:29:21,230 - 127.0.0.1 - - [21/Apr/2026 17:29:21] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:29:25,247 - 127.0.0.1 - - [21/Apr/2026 17:29:25] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:29:29,200 - 127.0.0.1 - - [21/Apr/2026 17:29:29] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:29:33,202 - 127.0.0.1 - - [21/Apr/2026 17:29:33] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:29:36,669 - {"time": "2026-04-21T11:59:36.657218", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/login", "body": "", "headers": {"User-Agent": "Hydra/9.3"}}
+2026-04-21 17:29:37,024 - 127.0.0.1 - - [21/Apr/2026 17:29:37] "GET /honeypot/login HTTP/1.1" 200 -
+2026-04-21 17:29:39,101 - 127.0.0.1 - - [21/Apr/2026 17:29:39] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:29:42,082 - 127.0.0.1 - - [21/Apr/2026 17:29:42] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:29:45,560 - 127.0.0.1 - - [21/Apr/2026 17:29:45] "[35m[1mPOST /api/logs HTTP/1.1[0m" 201 -
+2026-04-21 17:30:13,343 - 127.0.0.1 - - [21/Apr/2026 17:30:13] "[32mGET /logs HTTP/1.1[0m" 302 -
+2026-04-21 17:30:13,347 - 127.0.0.1 - - [21/Apr/2026 17:30:13] "GET /login HTTP/1.1" 200 -
+2026-04-21 17:35:09,819 - {"time": "2026-04-21T12:05:09.807321", "ip": "127.0.0.1", "method": "POST", "path": "/login", "body": "body=email=hdgewtyfbdhg%4035&password=HDTYFETNJEH", "headers": {"Origin": "http://localhost:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36", "Referer": "http://localhost:5000/login"}, "note": "suspicious_request"}
+2026-04-21 17:35:09,835 - 127.0.0.1 - - [21/Apr/2026 17:35:09] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 17:35:09,841 - 127.0.0.1 - - [21/Apr/2026 17:35:09] "GET /login HTTP/1.1" 200 -
+2026-04-21 17:35:24,764 - {"time": "2026-04-21T12:05:24.749176", "ip": "127.0.0.1", "method": "POST", "path": "/login", "body": "body=email=HBSFRSBHJ%40jh446&password=jbhtfsdgtfd", "headers": {"Origin": "http://localhost:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36", "Referer": "http://localhost:5000/login"}, "note": "suspicious_request"}
+2026-04-21 17:35:24,773 - 127.0.0.1 - - [21/Apr/2026 17:35:24] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 17:35:25,060 - 127.0.0.1 - - [21/Apr/2026 17:35:25] "GET /login HTTP/1.1" 200 -
