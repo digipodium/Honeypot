@@ -2050,3 +2050,18 @@ smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepte
 2026-04-21 14:49:59,798 - 127.0.0.1 - - [21/Apr/2026 14:49:59] "GET /IPmonitor HTTP/1.1" 200 -
 2026-04-21 14:49:59,826 - 127.0.0.1 - - [21/Apr/2026 14:49:59] "GET /api/ip-monitor HTTP/1.1" 200 -
 2026-04-21 14:50:11,634 - 127.0.0.1 - - [21/Apr/2026 14:50:11] "[33mGET /honeypot/ HTTP/1.1[0m" 404 -
+2026-04-21 15:23:10,325 - {"time": "2026-04-21T09:53:10.312761", "ip": "127.0.0.1", "method": "GET", "path": "/honeypot/login", "body": "", "headers": {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"}}
+2026-04-21 15:23:11,109 - 127.0.0.1 - - [21/Apr/2026 15:23:11] "GET /honeypot/login HTTP/1.1" 200 -
+2026-04-21 15:23:16,549 - 127.0.0.1 - - [21/Apr/2026 15:23:16] "GET /IPmonitor HTTP/1.1" 200 -
+2026-04-21 15:23:16,599 - 127.0.0.1 - - [21/Apr/2026 15:23:16] "GET /api/ip-monitor HTTP/1.1" 200 -
+2026-04-21 15:23:19,094 - 127.0.0.1 - - [21/Apr/2026 15:23:19] "GET / HTTP/1.1" 200 -
+2026-04-21 15:23:22,811 - 127.0.0.1 - - [21/Apr/2026 15:23:22] "GET /login HTTP/1.1" 200 -
+2026-04-21 15:24:05,512 - {"time": "2026-04-21T09:54:05.471638", "ip": "127.0.0.1", "method": "POST", "path": "/login", "body": "body=email=mmm%40mail.com&password=%40Abc1234", "headers": {"Origin": "http://127.0.0.1:5000", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36", "Referer": "http://127.0.0.1:5000/login"}, "note": "suspicious_request"}
+2026-04-21 15:24:05,956 - 127.0.0.1 - - [21/Apr/2026 15:24:05] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 15:24:06,024 - 127.0.0.1 - - [21/Apr/2026 15:24:06] "GET /dashboard HTTP/1.1" 200 -
+2026-04-21 15:24:06,120 - 127.0.0.1 - - [21/Apr/2026 15:24:06] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:24:10,928 - 127.0.0.1 - - [21/Apr/2026 15:24:10] "GET /IPmonitor HTTP/1.1" 200 -
+2026-04-21 15:24:10,976 - 127.0.0.1 - - [21/Apr/2026 15:24:10] "GET /api/ip-monitor HTTP/1.1" 200 -
+2026-04-21 15:24:16,731 - 127.0.0.1 - - [21/Apr/2026 15:24:16] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 15:24:21,644 - 127.0.0.1 - - [21/Apr/2026 15:24:21] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 15:24:21,682 - 127.0.0.1 - - [21/Apr/2026 15:24:21] "GET /api/logs HTTP/1.1" 200 -

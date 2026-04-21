@@ -1457,7 +1457,6 @@ def external_logs_stats():
         }
     )
 
-
 @app.route("/api/dashboard/summary")
 @login_required
 def dashboard_summary():
@@ -1476,7 +1475,6 @@ def dashboard_summary():
             "high_threats": threat_counter.get("CRITICAL", 0) + threat_counter.get("HIGH", 0),
         }
     )
-
 
 @app.route("/api/ip-monitor")
 @login_required
