@@ -205,12 +205,6 @@ def capture_request_data(req=None):
         req = request  # fallback to Flask's global request context
 
     capture = parse_request_data(req)
-    
-    # Do not log login or register interactions
-    path = capture.get("path", "").lower()
-    if "login" in path or "register" in path:
-        return build_fake_response(req.path)
-
     threats = classify_threat(capture)
 
     log_capture(capture, threats)

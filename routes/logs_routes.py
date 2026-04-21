@@ -62,10 +62,6 @@ def get_logs():
 # ADD LOG (Honeypot usage)
 # -------------------------
 def add_log(ip, status, endpoint):
-    # Do not log login or register interactions
-    if endpoint and ("login" in endpoint.lower() or "register" in endpoint.lower()):
-        return
-
     new_log = Log(
         ip_address=ip,
         status=status,

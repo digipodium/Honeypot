@@ -2433,3 +2433,43 @@ smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepte
 2026-04-21 18:51:28,787 -  * Restarting with stat
 2026-04-21 18:51:30,084 -  * Debugger is active!
 2026-04-21 18:51:30,088 -  * Debugger PIN: 143-866-343
+2026-04-21 18:56:49,160 - 127.0.0.1 - - [21/Apr/2026 18:56:49] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2026-04-21 18:58:32,557 - 127.0.0.1 - - [21/Apr/2026 18:58:32] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-04-21 18:58:32,625 - 127.0.0.1 - - [21/Apr/2026 18:58:32] "GET /dashboard HTTP/1.1" 200 -
+2026-04-21 18:58:32,884 - 127.0.0.1 - - [21/Apr/2026 18:58:32] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 18:58:36,906 - 127.0.0.1 - - [21/Apr/2026 18:58:36] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 18:58:37,117 - 127.0.0.1 - - [21/Apr/2026 18:58:37] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 18:59:18,709 - 127.0.0.1 - - [21/Apr/2026 18:59:18] "GET /honeypot/login HTTP/1.1" 200 -
+2026-04-21 18:59:18,859 - 127.0.0.1 - - [21/Apr/2026 18:59:18] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-21 18:59:22,188 - 127.0.0.1 - - [21/Apr/2026 18:59:22] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 18:59:22,492 - 127.0.0.1 - - [21/Apr/2026 18:59:22] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 18:59:24,919 - 127.0.0.1 - - [21/Apr/2026 18:59:24] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 18:59:24,972 - 127.0.0.1 - - [21/Apr/2026 18:59:24] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 18:59:25,888 - 127.0.0.1 - - [21/Apr/2026 18:59:25] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 18:59:26,142 - 127.0.0.1 - - [21/Apr/2026 18:59:26] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 18:59:27,032 - 127.0.0.1 - - [21/Apr/2026 18:59:27] "GET /attacklogs HTTP/1.1" 200 -
+2026-04-21 18:59:27,075 - 127.0.0.1 - - [21/Apr/2026 18:59:27] "GET /api/logs HTTP/1.1" 200 -
+2026-04-21 19:03:00,229 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\redirector\\redirector.py', reloading
+2026-04-21 19:03:00,549 -  * Restarting with stat
+2026-04-21 19:03:02,590 -  * Debugger is active!
+2026-04-21 19:03:02,594 -  * Debugger PIN: 143-866-343
+2026-04-21 19:03:48,976 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\app.py', reloading
+2026-04-21 19:03:49,310 -  * Restarting with stat
+2026-04-21 19:03:50,620 -  * Debugger is active!
+2026-04-21 19:03:50,624 -  * Debugger PIN: 143-866-343
+2026-04-21 19:03:56,697 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\services\\request_capture.py', reloading
+2026-04-21 19:03:56,819 -  * Restarting with stat
+2026-04-21 19:03:57,900 -  * Debugger is active!
+2026-04-21 19:03:57,903 -  * Debugger PIN: 143-866-343
+2026-04-21 19:04:10,006 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\routes\\logs_routes.py', reloading
+2026-04-21 19:04:10,234 -  * Restarting with stat
+2026-04-21 19:04:11,437 -  * Debugger is active!
+2026-04-21 19:04:11,440 -  * Debugger PIN: 143-866-343
+2026-04-21 19:04:25,560 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\redirector\\redirector.py', reloading
+2026-04-21 19:04:25,892 -  * Restarting with stat
+2026-04-21 19:04:26,997 -  * Debugger is active!
+2026-04-21 19:04:27,000 -  * Debugger PIN: 143-866-343
+2026-04-21 19:04:34,068 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\redirector\\redirector.py', reloading
+2026-04-21 19:04:34,270 -  * Restarting with stat
+2026-04-21 19:04:35,469 -  * Debugger is active!
+2026-04-21 19:04:35,473 -  * Debugger PIN: 143-866-343
