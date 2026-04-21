@@ -2043,3 +2043,10 @@ smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepte
 2026-04-21 14:47:59,545 - 127.0.0.1 - - [21/Apr/2026 14:47:59] "GET /attacklogs HTTP/1.1" 200 -
 2026-04-21 14:47:59,571 - 127.0.0.1 - - [21/Apr/2026 14:47:59] "GET /api/logs HTTP/1.1" 200 -
 2026-04-21 14:49:01,057 -  * Detected change in 'D:\\Batches\\2026\\Honeypot-1\\redirector\\redirector.py', reloading
+2026-04-21 14:49:01,453 -  * Restarting with watchdog (windowsapi)
+2026-04-21 14:49:02,857 -  * Debugger is active!
+2026-04-21 14:49:02,862 -  * Debugger PIN: 925-345-474
+2026-04-21 14:49:58,374 - 127.0.0.1 - - [21/Apr/2026 14:49:58] "GET /honeypot-logs HTTP/1.1" 200 -
+2026-04-21 14:49:59,798 - 127.0.0.1 - - [21/Apr/2026 14:49:59] "GET /IPmonitor HTTP/1.1" 200 -
+2026-04-21 14:49:59,826 - 127.0.0.1 - - [21/Apr/2026 14:49:59] "GET /api/ip-monitor HTTP/1.1" 200 -
+2026-04-21 14:50:11,634 - 127.0.0.1 - - [21/Apr/2026 14:50:11] "[33mGET /honeypot/ HTTP/1.1[0m" 404 -
