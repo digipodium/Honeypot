@@ -2253,3 +2253,7 @@ smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepte
 2026-04-21 17:48:18,588 -  * Restarting with stat
 2026-04-21 17:48:19,608 -  * Debugger is active!
 2026-04-21 17:48:19,612 -  * Debugger PIN: 143-866-343
+2026-04-21 17:48:54,893 -  * Detected change in 'C:\\Users\\hp\\Desktop\\Honeypot\\redirector\\redirector.py', reloading
+2026-04-21 17:48:55,544 -  * Restarting with stat
+2026-04-21 17:48:56,892 -  * Debugger is active!
+2026-04-21 17:48:56,900 -  * Debugger PIN: 143-866-343
