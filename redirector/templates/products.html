@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Products | Nova-Tech Solutions{% endblock %}
+
+{% block content %}
+<section style="margin-bottom: 60px;">
+    <h1 style="font-size: 3rem; margin-bottom: 16px;">Product <span class="gradient-text">Catalog</span></h1>
+    <p class="subtitle" style="margin-bottom: 0;">Explore our suite of specialized cloud infrastructure tools.</p>
+</section>
+
+<div style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); display: grid; gap: 24px;">
+    <div class="product-card" style="background: var(--surface); border: 1px solid var(--border); padding: 32px; border-radius: 20px; transition: transform 0.3s;">
+        <div style="width: 48px; height: 48px; background: rgba(99, 102, 241, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <h3 style="margin-bottom: 12px;">Compute Engine X1</h3>
+        <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 24px;">High-frequency compute instances for data-intensive processing.</p>
+        <a href="/products?id=101" class="btn" style="border: 1px solid var(--border); color: #fff; width: 100%; text-align: center;">View Details</a>
+    </div>
+
+    <div class="product-card" style="background: var(--surface); border: 1px solid var(--border); padding: 32px; border-radius: 20px;">
+        <div style="width: 48px; height: 48px; background: rgba(168, 85, 247, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3 style="margin-bottom: 12px;">Sentinel Shield</h3>
+        <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 24px;">AI-driven firewall and real-time network traffic analysis.</p>
+        <a href="/products?id=205" class="btn" style="border: 1px solid var(--border); color: #fff; width: 100%; text-align: center;">View Details</a>
+    </div>
+
+    <div class="product-card" style="background: var(--surface); border: 1px solid var(--border); padding: 32px; border-radius: 20px;">
+        <div style="width: 48px; height: 48px; background: rgba(236, 72, 153, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+        </div>
+        <h3 style="margin-bottom: 12px;">Void Storage</h3>
+        <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 24px;">Encrypted object storage with sub-millisecond retrieval times.</p>
+        <a href="/products?id=309" class="btn" style="border: 1px solid var(--border); color: #fff; width: 100%; text-align: center;">View Details</a>
+    </div>
+</div>
+
+<style>
+    .product-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--primary);
+    }
+</style>
+{% endblock %}

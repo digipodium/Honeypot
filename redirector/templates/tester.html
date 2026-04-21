@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Honeypot Redirector & Test Suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --bg: #030712;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f9fafb;
+            --text-dim: #9ca3af;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card:hover {
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Attack Presets */
+        .attack-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .btn-attack {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 16px;
+            border-radius: 16px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-attack:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+
+        .btn-attack span.type {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .btn-attack span.name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* Terminal Log */
+        .terminal {
+            background: #000;
+            border-radius: 16px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            margin-top: 24px;
+        }
+
+        .terminal-line {
+            margin-bottom: 8px;
+            display: flex;
+            gap: 12px;
+            animation: slideInLeft 0.3s ease-out;
+        }
+
+        .line-time { color: #666; }
+        .line-method { color: var(--primary); font-weight: bold; }
+        .line-path { color: #fff; }
+        .line-status { color: #ebcb8b; }
+
+        /* Stats Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .custom-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #fff;
+            margin-top: 20px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .custom-input:focus {
+            border-color: var(--primary);
+        }
+
+        .footer {
+            margin-top: 60px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Honeypot Redirector</h1>
+            <p class="subtitle">Securely intercepting and redirecting suspicious traffic</p>
+        </header>
+
+        <div class="dashboard">
+            <main>
+                <div class="card">
+                    <h2>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Simulate Attack Vectors
+                    </h2>
+                    
+                    <div class="attack-grid">
+                        <button class="btn-attack" onclick="triggerAttack('/.env')">
+                            <span class="type">Recon</span>
+                            <span class="name">Environment File</span>
+                        </button>
+                        <button class="btn-attack" onclick="triggerAttack('/wp-admin')">
+                            <span class="type">Brute</span>
+                            <span class="name">Admin Panel</span>
+                        </button>
+                        <button class="btn-attack" onclick="triggerAttack('/api/users?id=1%20OR%201=1')">
+                            <span class="type">SQLi</span>
+                            <span class="name">SQL Injection</span>
+                        </button>
+                        <button class="btn-attack" onclick="triggerAttack('/search?q=<script>alert(1)</script>')">
+                            <span class="type">XSS</span>
+                            <span class="name">Cross-Site Scripting</span>
+                        </button>
+                        <button class="btn-attack" onclick="triggerAttack('/config')">
+                            <span class="type">Access</span>
+                            <span class="name">Config Archive</span>
+                        </button>
+                        <button class="btn-attack" onclick="triggerAttack('/shell.php')">
+                            <span class="type">RCE</span>
+                            <span class="name">Web Shell Probe</span>
+                        </button>
+                    </div>
+
+                    <input type="text" id="customPath" class="custom-input" placeholder="Enter custom path to test (e.g. /my-secret-file)..." onkeydown="if(event.key==='Enter') triggerAttack(this.value)">
+                </div>
+
+                <div class="terminal" id="terminal">
+                    <div class="terminal-line">
+                        <span class="line-time">[SYSTEM]</span>
+                        <span class="line-method">INIT</span>
+                        <span class="line-path">Redirector service started...</span>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="sidebar">
+                <div class="card">
+                    <h2>Live Metrics</h2>
+                    <div style="margin-bottom: 20px;">
+                        <span class="status-pill">
+                            <span class="status-dot"></span>
+                            ACTIVE GATEKEEPER
+                        </span>
+                    </div>
+                    <div style="font-size: 0.9rem; color: var(--text-dim);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span>Target Server</span>
+                            <span style="color: #fff;">localhost:5000</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span>Redirect Mode</span>
+                            <span style="color: #fff;">Smart 302</span>
+                        </div>
+                        <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Captures Today</span>
+                            <span id="captureCount" style="color: var(--primary); font-weight: bold;">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Documentation</h2>
+                    <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.6;">
+                        This redirector simulates a front-end server that identifies malicious patterns and sends them to a dedicated Honeypot for analysis.
+                    </p>
+                </div>
+            </aside>
+        </div>
+
+        <footer class="footer">
+            &copy; 2026 Honeypot Project. Developed by Antigravity.
+        </footer>
+    </div>
+
+    <script>
+        let captures = 0;
+        const terminal = document.getElementById('terminal');
+        const captureCount = document.getElementById('captureCount');
+
+        function logToTerminal(method, path, status) {
+            const now = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.innerHTML = `
+                <span class="line-time">[${now}]</span>
+                <span class="line-method">${method}</span>
+                <span class="line-path">${path}</span>
+                <span class="line-status">-> REDIRECTED</span>
+            `;
+            terminal.insertBefore(line, terminal.firstChild);
+            
+            captures++;
+            captureCount.innerText = captures;
+        }
+
+        async function triggerAttack(path) {
+            if (!path) return;
+            if (!path.startsWith('/')) path = '/' + path;
+            
+            // Log locally for visual feedback
+            logToTerminal('GET', path, '302');
+            
+            // In a real scenario, the browser would follow this.
+            // For testing, we can either window.location or use fetch with redirect: 'follow'
+            // But we want the user to stay on this page to see the logs, so we open in a new tab
+            // OR we fetch it and let the server handle the redirect.
+            
+            // We'll open in a new tab to see the Honeypot's response
+            window.open(path, '_blank');
+        }
+    </script>
+</body>
+</html>
